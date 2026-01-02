@@ -31,6 +31,11 @@ jobs:
       env:
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        NAVER_AD_CLIENT_ID: ${{ secrets.NAVER_AD_CLIENT_ID }}
+        NAVER_AD_CLIENT_SECRET: ${{ secrets.NAVER_AD_CLIENT_SECRET }}
+        NAVER_AD_CUSTOMER_ID: ${{ secrets.NAVER_AD_CUSTOMER_ID }}
+        NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+        NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
       run: |
         python main.py
 
