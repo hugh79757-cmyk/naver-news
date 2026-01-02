@@ -77,11 +77,10 @@ class NaverAPI:
                             mobile_volume = 10
                             
                         results[keyword] = pc_volume + mobile_volume
-                if response.status_code == 200:
-    # ...
-else:
-    print(f"    ❌ [NaverAPI] 광고 API 에러: {response.status_code}")
-    print(f"    ❌ [NaverAPI] 응답 내용: {response.text}")
+                else:
+                    print(f"    ❌ [NaverAPI] 광고 API 에러: {response.status_code}")
+                    print(f"    ❌ [NaverAPI] 응답 내용: {response.text}")
+
 
                     
             except Exception as e:
