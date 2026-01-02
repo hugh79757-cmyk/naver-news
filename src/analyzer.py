@@ -39,7 +39,7 @@ def analyze_headlines(headlines):
 
     try:
         message = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-haiku-20240307",
             max_tokens=3000,
             temperature=0.7,
             messages=[{"role": "user", "content": prompt}]
