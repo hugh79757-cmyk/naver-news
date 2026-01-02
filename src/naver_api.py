@@ -112,52 +112,46 @@ class NaverAPI:
             return 0
     
     def analyze_keywords(self, keywords):
-        """키워드 분석: 검색량, 문서수, 포화도 계산"""
-        print(f"    📊 [NaverAPI] {len(keywords)}개 키워드 분석 시작...")
+    """키워드 분석: 검색량, 문서수, 포화도 계산"""
+    print(f"    📊 [NaverAPI] {len(keywords)}개 키워드 분석 시작...")
+    
+    print("    🔍 검색량 조회 중...")
+    search_volumes = self.get_search_volume(keywords)
+    print(f"    ✅ {len(search_volumes)}개 키워드 검색량 조회 완료")
+    
+    # 상위 200개로 확대
+    sorted_keywords = sorted(search_volumes.items(), key=lambda x: x[1], reverse=True)[:200]
+    
+    print(f"    📝 블로그 문서수 조회 중... (상위 {len(sorted_keywords)}개)")
+    results = []
+    
+    for keyword, volume in sorted_keywords:
+        if volume == 0:
+            continue
         
-        print("    🔍 검색량 조회 중...")
-        search_volumes = self.get_search_volume(keywords)
-        print(f"    ✅ {len(search_volumes)}개 키워드 검색량 조회 완료")
+        blog_count = self.get_blog_count(keyword)
+        time.sleep(0.05)
         
-        sorted_keywords = sorted(search_volumes.items(), key=lambda x: x[1], reverse=True)[:100]
+        saturation = round(blog_count / volume, 2) if volume > 0 else 999
         
-        print(f"    📝 블로그 문서수 조회 중... (상위 {len(sorted_keywords)}개)")
-        results = []
+        if saturation <= 0.3:
+            possibility = "🟢 매우높음"
+        elif saturation <= 0.5:
+            possibility = "🟡 높음"
+        elif saturation <= 1.0:
+            possibility = "🟠 보통"
+        else:
+            possibility = "🔴 낮음"
         
-        for keyword, volume in sorted_keywords:
-            if volume == 0:
-                continue
-            
-            blog_count = self.get_blog_count(keyword)
-            time.sleep(0.05)
-            
-            saturation = round(blog_count / volume, 2) if volume > 0 else 999
-            
-            if saturation <= 0.3:
-                possibility = "🟢 매우높음"
-            elif saturation <= 0.5:
-                possibility = "🟡 높음"
-            elif saturation <= 1.0:
-                possibility = "🟠 보통"
-            else:
-                possibility = "🔴 낮음"
-            
-            results.append({
-                "keyword": keyword,
-                "monthly_search": volume,
-                "blog_count": blog_count,
-                "saturation": saturation,
-                "possibility": possibility
-            })
-        
-            results.sort(key=lambda x: x["saturation"])
-        
-        # 포화도 0.5 이하만 필터링 (매우높음 + 높음)
-        filtered_results = [r for r in results if r["saturation"] <= 0.5]
-        
-        # 필터링 결과가 없으면 전체 결과 중 상위 50개 반환
-        if not filtered_results:
-            filtered_results = results[:50]
-        
-        print(f"    ✅ {len(filtered_results)}개 키워드 분석 완료 (상위노출 가능 키워드)")
-        return filtered_results
+        results.append({
+            "keyword": keyword,
+            "monthly_search": volume,
+            "blog_count": blog_count,
+            "saturation": saturation,
+            "possibility": possibility
+        })
+    
+    results.sort(key=lambda x: x["saturation"])
+    
+    print(f"    ✅ {len(results)}개 키워드 분석 완료")
+    return results
