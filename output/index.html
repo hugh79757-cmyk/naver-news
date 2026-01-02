@@ -3,66 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 뉴스 인사이트</title>
+    <title>블로그 키워드 인사이트 - SEO 분석 리포트</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <style>
-        body { font-family: 'Pretendard', sans-serif; }
-        .container { max-width: 800px; padding-top: 2rem; }
-        .tip { color: #d81b60; font-weight: bold; font-size: 0.9em; }
-        header { border-bottom: 1px solid #eee; margin-bottom: 2rem; padding-bottom: 1rem; }
-        footer { margin-top: 3rem; border-top: 1px solid #eee; padding-top: 1rem; color: #888; font-size: 0.8em; text-align: center; }
+        body { 
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+        }
+        .container { 
+            max-width: 900px; 
+            padding-top: 2rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        /* 헤더 */
+        header { 
+            border-bottom: 3px solid #667eea;
+            margin-bottom: 2rem; 
+            padding-bottom: 1rem;
+            text-align: center;
+        }
+        header h1 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        /* 키워드 아이템 */
+        .keyword-item {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+        .keyword-item h4 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        /* 키워드 섹션 */
+        .keyword-section {
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+        .keyword-section strong {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        
+        /* 키워드 스타일 */
+        .keyword {
+            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-block;
+            margin: 4px;
+        }
+        
+        /* 배지 */
+        .badge {
+            background: #e9ecef;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #495057;
+            margin-left: 8px;
+        }
+        .badge.red { background: #fee; color: #c00; }
+        .badge.orange { background: #fff3cd; color: #856404; }
+        .badge.green { background: #d4edda; color: #155724; }
+        
+        /* 팁 */
+        .tip { 
+            color: #d81b60; 
+            font-weight: bold; 
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .small-tip {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+        
+        /* CTR */
+        .ctr {
+            background: #ffd700;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .example {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-left: 20px;
+        }
+        
+        /* 메타 정보 */
+        .meta-info {
+            background: #fff9e6;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            border: 1px dashed #ffc107;
+        }
+        .tag {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            margin-right: 8px;
+            display: inline-block;
+            margin-bottom: 6px;
+            border: 1px solid #dee2e6;
+        }
+        
+        /* 보너스 섹션 */
+        .bonus-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+        .bonus-section h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+        .bonus-section .keyword {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        /* 푸터 */
+        footer { 
+            margin-top: 3rem; 
+            border-top: 1px solid #eee; 
+            padding-top: 1rem; 
+            color: #888; 
+            font-size: 0.85em; 
+            text-align: center; 
+        }
+        
+        /* HR */
+        hr {
+            margin: 2rem 0;
+            border: none;
+            border-top: 2px dashed #e9ecef;
+        }
+        
+        /* 리스트 스타일 */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        ul li:last-child {
+            border-bottom: none;
+        }
+        
+        ol {
+            padding-left: 1.2rem;
+        }
+        ol li {
+            padding: 10px 0;
+            line-height: 1.8;
+        }
     </style>
 </head>
 <body>
     <main class="container">
         <header>
-            <h1>📰 AI 뉴스 인사이트</h1>
-            <p>오늘의 뉴스 흐름을 읽고 블로그 글감을 찾으세요.</p>
-            <small>업데이트: 2026년 01월 02일 14시 49분</small>
+            <h1>🎯 블로그 키워드 인사이트</h1>
+            <p>오늘의 뉴스를 분석한 <strong>SEO 최적화 키워드</strong></p>
+            <small>📅 업데이트: 2026년 01월 02일 18시 17분</small>
         </header>
 
-        <!-- 여기에 AI 분석 결과가 들어갑니다 -->
+        <!-- AI 분석 결과가 여기 삽입됩니다 -->
         <section>
             <div class="report-section">
     <h3>🔥 오늘의 핫 이슈 3</h3>
     <ul>
         <li>
-            <strong>이슈 1: 윤석열 대통령 집무실 '사우나·대형침대' 논란</strong><br>
-            대통령 집무실 내 비밀통로와 연결된 사우나, 대형 침대 시설이 확인되며 '호텔급' 시설 논란이 확산 중<br>
-            <span class="tip">💡 블로그 키워드 추천: 윤석열 사우나, 대통령 집무실 논란, 비밀통로</span>
+            <strong>이슈 1: 윤석열 대통령 추가 구속영장 발부</strong><br>
+            법원이 '일반 이적' 혐의로 윤석열 대통령에 대한 추가 구속영장을 발부하며 증거인멸 우려를 이유로 들었다.<br>
+            <span class="tip">💡 블로그 키워드 추천: 윤석열 구속영장, 일반이적죄, 대통령 탄핵</span>
         </li>
         <li>
-            <strong>이슈 2: 국민의힘 지지율 급락 & 이혜훈 갑질 논란</strong><br>
-            중도층 이탈로 국민의힘 지지율 27%→16% 폭락, 이혜훈 의원 보좌진 사적 이용 폭로까지 겹쳐 당 내홍 심화<br>
-            <span class="tip">💡 블로그 키워드 추천: 국민의힘 지지율, 이혜훈 갑질, 중도층 이탈</span>
+            <strong>이슈 2: 코스피 새해 첫날 4300선 돌파</strong><br>
+            2025년 첫 거래일 코스피가 4300선을 넘어서며 삼성전자와 SK하이닉스가 상승을 주도했다.<br>
+            <span class="tip">💡 블로그 키워드 추천: 코스피 4300, 삼성전자 주가, 2025 주식전망</span>
         </li>
         <li>
-            <strong>이슈 3: 근로자 월 최대 60만원 지원금 부활</strong><br>
-            2년 만에 재개되는 고용지원금 제도, 근로자 1인당 월 최대 60만원 지급 예정으로 신청 서두를 필요<br>
-            <span class="tip">💡 블로그 키워드 추천: 고용지원금 신청, 월 60만원 지원금, 2025 정부지원금</span>
+            <strong>이슈 3: LG엔솔 美 미시간 공장 가동 연기</strong><br>
+            배터리 업계 쇼크가 확산되며 LG에너지솔루션이 3조원 규모의 미국 미시간 공장 가동을 연기한다.<br>
+            <span class="tip">💡 블로그 키워드 추천: LG엔솔 미시간, 배터리 산업 위기, 전기차 배터리</span>
         </li>
     </ul>
 </div>
 
 <div class="report-section">
-    <h3>📈 블로거 주목! 트렌드 키워드</h3>
+    <h3>📌 블로거 주목! 트렌드 키워드</h3>
     <ul>
-        <li><strong>건강/생활:</strong> 전기매트 전자파, 다이어트 캠프, 응급실 이물질</li>
-        <li><strong>경제/재테크:</strong> SK하이닉스 성과급, 샤넬 명품 순위, 아파트 명도소송</li>
-        <li><strong>연예/이슈:</strong> 이시영 자궁적출, 박나래 주사이모, 나나 역고소</li>
+        <li><strong>라이프스타일:</strong> 곽튜브 다이어트, 2026 황금연휴, 크리스마스 케이크 트렌드</li>
+        <li><strong>건강:</strong> 혈액암 초기증상, 체지방 감량 운동</li>
+        <li><strong>연예:</strong> 박나래 논란, 배우 나나 강도 사건</li>
     </ul>
 </div>
 
 <div class="report-section">
     <h3>✍️ 콘텐츠 아이디어 제안</h3>
-    <p><strong>1. 정보형 포스팅:</strong> "2025 근로자 지원금 신청방법 총정리" - 검색 유입 극대화 가능</p>
-    <p><strong>2. 리뷰형 포스팅:</strong> "전기매트 전자파 실측 리뷰" - 겨울철 관심 키워드와 연계</p>
-    <p><strong>3. 이슈 분석형:</strong> "흑백요리사 이후 외식업계 변화" - 줄서기 문화, 맛집 트렌드 분석</p>
+    <p><strong>1. 정보성 콘텐츠:</strong> "2026년 황금연휴 총정리 - 연차 효율적으로 쓰는 법"</p>
+    <p><strong>2. 건강 콘텐츠:</strong> "잠잘 때 나타나는 혈액암 위험 신호 5가지"</p>
+    <p><strong>3. 재테크 콘텐츠:</strong> "코스피 4300 시대, 반도체 주식 지금 사도 될까?"</p>
+    <p><strong>4. 환경 이슈:</strong> "고래 뱃속 쓰레기 충격 - 해양 플라스틱 오염의 현실"</p>
 </div>
         </section>
 
         <footer>
-            Generated by News Insight Bot
+            <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
+            <p style="font-size: 0.8rem; color: #aaa;">
+                이 키워드는 AI 분석 결과이며, 실제 검색량과 다를 수 있습니다.
+            </p>
         </footer>
     </main>
 </body>
