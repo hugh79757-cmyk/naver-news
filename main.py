@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from src import crawler, analyzer, builder
+from src.naver_api import NaverAPI
 
 load_dotenv()
 
@@ -12,7 +13,7 @@ def main():
     all_headlines = []
 
     # 1. 네이버 뉴스 수집
-    print("\n[1/7] 네이버 랭킹 뉴스 수집 중...")
+    print("\n[1/8] 네이버 랭킹 뉴스 수집 중...")
     naver_news = crawler.fetch_naver_ranking_news()
     if naver_news:
         all_headlines.extend(naver_news)
@@ -22,25 +23,25 @@ def main():
 
     # 2. 네이버 메인 (백업)
     if not naver_news:
-        print("\n[2/7] 네이버 메인 헤드라인 수집 중 (백업)...")
+        print("\n[2/8] 네이버 메인 헤드라인 수집 중 (백업)...")
         naver_main = crawler.fetch_naver_main_headlines()
         if naver_main:
             all_headlines.extend(naver_main)
 
     # 3. 정책브리핑 수집
-    print("\n[3/7] 정책브리핑 수집 중...")
+    print("\n[3/8] 정책브리핑 수집 중...")
     policy_news = crawler.fetch_policy_api()
     if policy_news:
         all_headlines.extend(policy_news)
 
     # 4. 다음 뉴스 수집
-    print("\n[4/7] 다음 뉴스 수집 중...")
+    print("\n[4/8] 다음 뉴스 수집 중...")
     daum_news = crawler.fetch_daum_news()
     if daum_news:
         all_headlines.extend(daum_news)
 
     # 5. 데이터 검증
-    print("\n[5/7] 데이터 검증 중...")
+    print("\n[5/8] 데이터 검증 중...")
     if not all_headlines:
         print("    ❌ 수집된 뉴스가 없습니다.")
         print("\n💡 해결 방법:")
@@ -55,21 +56,31 @@ def main():
     all_headlines = list(set(all_headlines))
     print(f"    🔄 중복 제거 후: {len(all_headlines)}개")
 
-    # 6. Claude AI 키워드 분석
-    print("\n[6/7] Claude AI 키워드 분석 중...")
+    # 6. Claude AI 키워드 추출
+    print("\n[6/8] Claude AI 키워드 추출 중...")
     print("    ⏳ AI 분석 중... (약 10-20초 소요)")
     
-    keyword_report = analyzer.analyze_headlines(all_headlines)
+    keywords = analyzer.analyze_headlines(all_headlines)
     
-    if "오류" in keyword_report or "에러" in keyword_report:
-        print("    ❌ AI 분석 실패")
+    if not keywords:
+        print("    ❌ 키워드 추출 실패")
         return
     
-    print("    ✅ 키워드 분석 완료!")
+    print(f"    ✅ {len(keywords)}개 키워드 추출 완료!")
 
-    # 7. HTML 파일 생성
-    print("\n[7/7] HTML 리포트 생성 중...")
-    builder.build_html_file(keyword_report)
+    # 7. 네이버 API로 키워드 분석
+    print("\n[7/8] 네이버 API 키워드 분석 중...")
+    naver_api = NaverAPI()
+    keyword_results = naver_api.analyze_keywords(keywords)
+    
+    if not keyword_results:
+        print("    ❌ 키워드 분석 실패")
+        return
+
+    # 8. HTML 파일 생성
+    print("\n[8/8] HTML 리포트 생성 중...")
+    keyword_report = builder.build_keyword_report(keyword_results)
+    builder.build_html_file(keyword_report, keyword_results)
     
     print("\n" + "=" * 60)
     print("✨ 모든 작업 완료!")
