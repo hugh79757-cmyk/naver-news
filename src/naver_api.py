@@ -18,40 +18,45 @@ class NaverAPI:
         self.search_client_id = os.environ.get("NAVER_CLIENT_ID")
         self.search_client_secret = os.environ.get("NAVER_CLIENT_SECRET")
     
-    def _generate_signature(self, timestamp, method, uri):
-        """광고 API 서명 생성"""
-        message = f"{timestamp}.{method}.{uri}"
+    def _get_header(self, method, uri):
+        """광고 API 헤더 생성"""
+        timestamp = str(round(time.time() * 1000))
+        
+        # 서명 생성
+        sign = f"{timestamp}.{method}.{uri}"
         signature = hmac.new(
-            self.ad_client_secret.encode('utf-8'),
-            message.encode('utf-8'),
+            self.ad_client_secret.encode(),
+            sign.encode(),
             hashlib.sha256
         ).digest()
-        return base64.b64encode(signature).decode('utf-8')
+        signature_base64 = base64.b64encode(signature).decode()
+        
+        return {
+            "X-API-KEY": self.ad_client_id,
+            "X-Customer": self.ad_customer_id,
+            "X-Timestamp": timestamp,
+            "X-Signature": signature_base64,
+        }
     
     def get_search_volume(self, keywords):
         """
         네이버 광고 API로 월간검색량 조회
-        keywords: 키워드 리스트 (최대 100개)
         """
         if not all([self.ad_client_id, self.ad_client_secret, self.ad_customer_id]):
             print("    ❌ [NaverAPI] 광고 API 키가 없습니다.")
             return {}
         
+        BASE_URL = "https://api.naver.com"
         uri = "/keywordstool"
         method = "GET"
-        timestamp = str(int(time.time() * 1000))
-        signature = self._generate_signature(timestamp, method, uri)
-        
-        headers = {
-            "X-Timestamp": timestamp,
-            "X-API-KEY": self.ad_client_id,
-            "X-Customer": self.ad_customer_id,
-            "X-Signature": signature
-        }
         
         results = {}
+        
+        # 키워드를 100개씩 나눠서 요청
         for i in range(0, len(keywords), 100):
             batch = keywords[i:i+100]
+            
+            headers = self._get_header(method, uri)
             params = {
                 "hintKeywords": ",".join(batch),
                 "showDetail": "1"
@@ -59,7 +64,7 @@ class NaverAPI:
             
             try:
                 response = requests.get(
-                    "https://api.naver.com" + uri,
+                    BASE_URL + uri,
                     headers=headers,
                     params=params
                 )
@@ -71,6 +76,7 @@ class NaverAPI:
                         pc_volume = item.get("monthlyPcQcCnt", 0)
                         mobile_volume = item.get("monthlyMobileQcCnt", 0)
                         
+                        # "< 10" 같은 문자열 처리
                         if isinstance(pc_volume, str):
                             pc_volume = 10
                         if isinstance(mobile_volume, str):
@@ -80,8 +86,6 @@ class NaverAPI:
                 else:
                     print(f"    ❌ [NaverAPI] 광고 API 에러: {response.status_code}")
                     print(f"    ❌ [NaverAPI] 응답 내용: {response.text}")
-
-
                     
             except Exception as e:
                 print(f"    ❌ [NaverAPI] 광고 API 요청 실패: {e}")
