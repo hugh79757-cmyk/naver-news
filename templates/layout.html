@@ -4,184 +4,384 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>블로그 키워드 인사이트</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 🔴 Google AdSense 자동광고 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
+         crossorigin="anonymous"></script>
+    
     <style>
+        :root {
+            /* 단청 색상 팔레트 */
+            --dancheong-blue: #1e3a8a;      /* 청색 (메인) */
+            --dancheong-red: #dc2626;       /* 적색 (강조) */
+            --dancheong-gold: #f59e0b;      /* 금색 (포인트) */
+            --dancheong-green: #166534;     /* 녹색 */
+            --dancheong-white: #fefefe;     /* 백색 */
+            --dancheong-light: #f0f4ff;     /* 연한 배경 */
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body { 
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f8f9fa;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, var(--dancheong-light) 0%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.7;
         }
-        .container { 
-            max-width: 900px; 
-            padding-top: 2rem;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 12px;
-            margin: 2rem auto;
+        
+        /* ===== 헤더 - 단청 패턴 ===== */
+        .site-header {
+            background: linear-gradient(135deg, var(--dancheong-blue) 0%, #1e40af 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--dancheong-red) 0px,
+                var(--dancheong-red) 20px,
+                var(--dancheong-gold) 20px,
+                var(--dancheong-gold) 40px,
+                var(--dancheong-blue) 40px,
+                var(--dancheong-blue) 60px,
+                var(--dancheong-green) 60px,
+                var(--dancheong-green) 80px
+            );
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 2rem;
-        }
-        header { 
-            border-bottom: 3px solid #667eea;
-            margin-bottom: 2rem; 
-            padding-bottom: 1rem;
             text-align: center;
-        }
-        header h1 {
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-        .keyword-item {
-            background: #f8f9ff;
-            border-left: 4px solid #667eea;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border-radius: 8px;
-        }
-        .keyword {
-            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
             color: white;
+        }
+        
+        .header-content h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header-content p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .header-content small {
+            display: inline-block;
+            margin-top: 0.5rem;
+            background: rgba(255,255,255,0.15);
             padding: 4px 12px;
             border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        /* ===== 메인 레이아웃 (2열 구조) ===== */
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 2rem;
+        }
+        
+        /* ===== 사이드바 (광고 영역) ===== */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .ad-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+        }
+        
+        .ad-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        
+        .ad-sticky {
+            position: sticky;
+            top: 1rem;
+        }
+        
+        /* ===== 키워드 아이템 (기존 스타일 업그레이드) ===== */
+        .keyword-item {
+            background: linear-gradient(135deg, var(--dancheong-light) 0%, #fff 100%);
+            border-left: 5px solid var(--dancheong-blue);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0 12px 12px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .keyword-item:hover {
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            transform: translateX(4px);
+        }
+        
+        .keyword-item h4 {
+            color: var(--dancheong-blue);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px dashed var(--border-color);
+        }
+        
+        .keyword {
+            background: linear-gradient(120deg, var(--dancheong-blue) 0%, #3b82f6 100%);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             display: inline-block;
             margin: 4px;
         }
+        
         .badge {
-            background: #e9ecef;
+            background: #e5e7eb;
             padding: 3px 10px;
             border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: 6px;
+        }
+        .badge.red { background: #fef2f2; color: var(--dancheong-red); border: 1px solid #fecaca; }
+        .badge.orange { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .badge.green { background: #f0fdf4; color: var(--dancheong-green); border: 1px solid #bbf7d0; }
+        
+        .tip { 
+            color: var(--dancheong-red); 
+            font-weight: 600; 
             font-size: 0.85rem;
-            color: #495057;
             margin-left: 8px;
         }
-        .badge.red { background: #fee; color: #c00; }
-        .badge.orange { background: #fff3cd; color: #856404; }
-        .badge.green { background: #d4edda; color: #155724; }
-        .tip { 
-            color: #d81b60; 
-            font-weight: bold; 
-            font-size: 0.9em;
-            margin-left: 10px;
-        }
+        
         .ctr {
-            background: #ffd700;
+            background: linear-gradient(90deg, var(--dancheong-gold), #fbbf24);
             color: #000;
-            padding: 2px 8px;
-            border-radius: 4px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        
+        /* ===== 인피드 광고 ===== */
+        .infeed-ad {
+            background: #f9fafb;
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        /* ===== 아카이브 섹션 ===== */
+        .archive-section {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2rem;
+            border: 2px solid var(--dancheong-gold);
+        }
+        
+        .archive-section h3 {
+            color: #92400e;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .archive-list {
+            list-style: none;
+        }
+        
+        .archive-list li {
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border: 1px solid #fde68a;
+            transition: all 0.2s;
+        }
+        
+        .archive-list li:hover {
+            border-color: var(--dancheong-blue);
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+        }
+        
+        .archive-list a {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        /* ===== 푸터 ===== */
+        .site-footer {
+            background: var(--dancheong-blue);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .site-footer p {
+            opacity: 0.8;
             font-size: 0.85rem;
-            font-weight: bold;
         }
-        footer { 
-            margin-top: 3rem; 
-            border-top: 1px solid #eee; 
-            padding-top: 1rem; 
-            color: #888; 
-            font-size: 0.85em; 
-            text-align: center; 
+        
+        /* ===== 구분선 ===== */
+        hr { 
+            margin: 2rem 0; 
+            border: none; 
+            border-top: 2px dashed var(--border-color); 
         }
-        hr { margin: 2rem 0; border: none; border-top: 2px dashed #e9ecef; }
-        /* 아카이브 리스트 스타일 개선 */
-.archive-section {
-    background: linear-gradient(135deg, #fff9e6 0%, #fff5e6 100%);
-    padding: 2rem;
-    border-radius: 12px;
-    margin-top: 3rem;
-    border: 2px solid #ffc107;
-}
-
-.archive-section h3 {
-    color: #856404;
-    margin-bottom: 0.5rem;
-}
-
-.archive-info {
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
-}
-
-.archive-list {
-    list-style: none;
-    padding: 0;
-}
-
-.archive-list li {
-    background: white;
-    padding: 0;
-    margin-bottom: 8px;
-    border-radius: 6px;
-    border: 1px solid #e9ecef;
-    transition: all 0.2s;
-}
-
-.archive-list li:hover {
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
-    border-color: #667eea;
-}
-
-.archive-list a {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    color: #495057;
-    text-decoration: none;
-}
-
-.archive-list a:hover {
-    text-decoration: none;
-}
-
-.archive-date {
-    font-weight: 600;
-    color: #667eea;
-    font-size: 0.9rem;
-    min-width: 180px;
-}
-
-.archive-keywords {
-    color: #6c757d;
-    font-size: 0.85rem;
-    flex: 1;
-    text-align: right;
-}
-
-/* 반응형 */
-@media (max-width: 768px) {
-    .archive-list a {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .archive-date {
-        margin-bottom: 4px;
-    }
-    
-    .archive-keywords {
-        text-align: left;
-    }
-}
-
-    
-    
+        
+        /* ===== 반응형 ===== */
+        @media (max-width: 968px) {
+            .main-wrapper {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .ad-container {
+                flex: 1;
+                min-width: 280px;
+            }
+            
+            .ad-sticky {
+                position: relative;
+                top: 0;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .header-content h1 {
+                font-size: 1.4rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .keyword-item {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <main class="container">
-        <header>
+    <!-- 헤더 -->
+    <header class="site-header">
+        <div class="header-content">
             <h1>🎯 블로그 키워드 인사이트</h1>
             <p>오늘의 뉴스를 분석한 <strong>SEO 최적화 키워드</strong></p>
             <small>📅 업데이트: {{date}}</small>
-        </header>
+        </div>
+    </header>
 
-        <!-- ⭐ 이 부분에 AI 분석 결과가 들어갑니다 ⭐ -->
-        <section>
-            {{content}}
-        </section>
+    <!-- 메인 레이아웃 -->
+    <div class="main-wrapper">
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <section>
+                {{content}}
+            </section>
+            
+            <!-- 🔴 인피드 광고 (콘텐츠 중간) -->
+            <div class="infeed-ad">
+                <p class="ad-label">Advertisement</p>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6677996696534146"
+                     data-ad-slot="2800647401"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            
+            <!-- 아카이브 섹션 (있다면) -->
+            {{archive_section}}
+        </main>
 
-        <footer>
-            <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
-        </footer>
-    </main>
+        <!-- 사이드바 (광고) -->
+        <aside class="sidebar">
+            <div class="ad-sticky">
+                <!-- 🔴 사이드레일 광고 1 -->
+                <div class="ad-container">
+                    <p class="ad-label">Sponsored</p>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-6677996696534146"
+                         data-ad-slot="2800647401"
+                         data-ad-format="vertical"
+                         data-full-width-responsive="false"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                
+                <!-- 🔴 사이드레일 광고 2 -->
+                <div class="ad-container" style="margin-top: 1.5rem;">
+                    <p class="ad-label">Sponsored</p>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-6677996696534146"
+                         data-ad-slot="2800647401"
+                         data-ad-format="rectangle"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="site-footer">
+        <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
+    </footer>
 </body>
 </html>
