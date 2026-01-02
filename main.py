@@ -68,14 +68,16 @@ def main():
     
     print(f"    ✅ {len(keywords)}개 키워드 추출 완료!")
 
-    # 7. 네이버 API로 키워드 분석
+        # 7. 네이버 API로 키워드 분석
     print("\n[7/8] 네이버 API 키워드 분석 중...")
     naver_api = NaverAPI()
     keyword_results = naver_api.analyze_keywords(keywords)
     
+    # 결과가 없어도 계속 진행
     if not keyword_results:
-        print("    ❌ 키워드 분석 실패")
-        return
+        print("    ⚠️ 상위노출 가능 키워드가 없습니다. 전체 결과로 진행합니다.")
+        keyword_results = []
+
 
     # 8. HTML 파일 생성
     print("\n[8/8] HTML 리포트 생성 중...")
