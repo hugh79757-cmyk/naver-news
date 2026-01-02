@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그 키워드 인사이트</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 🔴 Google AdSense 자동광고 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
+         crossorigin="anonymous"></script>
+    
+    <style>
+        :root {
+            /* 단청 색상 팔레트 */
+            --dancheong-blue: #1e3a8a;      /* 청색 (메인) */
+            --dancheong-red: #dc2626;       /* 적색 (강조) */
+            --dancheong-gold: #f59e0b;      /* 금색 (포인트) */
+            --dancheong-green: #166534;     /* 녹색 */
+            --dancheong-white: #fefefe;     /* 백색 */
+            --dancheong-light: #f0f4ff;     /* 연한 배경 */
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, var(--dancheong-light) 0%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+        
+        /* ===== 헤더 - 단청 패턴 ===== */
+        .site-header {
+            background: linear-gradient(135deg, var(--dancheong-blue) 0%, #1e40af 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--dancheong-red) 0px,
+                var(--dancheong-red) 20px,
+                var(--dancheong-gold) 20px,
+                var(--dancheong-gold) 40px,
+                var(--dancheong-blue) 40px,
+                var(--dancheong-blue) 60px,
+                var(--dancheong-green) 60px,
+                var(--dancheong-green) 80px
+            );
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+        
+        .header-content h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header-content p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .header-content small {
+            display: inline-block;
+            margin-top: 0.5rem;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        /* ===== 메인 레이아웃 (2열 구조) ===== */
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 2rem;
+        }
+        
+        /* ===== 사이드바 (광고 영역) ===== */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .ad-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+        }
+        
+        .ad-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        
+        .ad-sticky {
+            position: sticky;
+            top: 1rem;
+        }
+        
+        /* ===== 키워드 아이템 (기존 스타일 업그레이드) ===== */
+        .keyword-item {
+            background: linear-gradient(135deg, var(--dancheong-light) 0%, #fff 100%);
+            border-left: 5px solid var(--dancheong-blue);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0 12px 12px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .keyword-item:hover {
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            transform: translateX(4px);
+        }
+        
+        .keyword-item h4 {
+            color: var(--dancheong-blue);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px dashed var(--border-color);
+        }
+        
+        .keyword {
+            background: linear-gradient(120deg, var(--dancheong-blue) 0%, #3b82f6 100%);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin: 4px;
+        }
+        
+        .badge {
+            background: #e5e7eb;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: 6px;
+        }
+        .badge.red { background: #fef2f2; color: var(--dancheong-red); border: 1px solid #fecaca; }
+        .badge.orange { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .badge.green { background: #f0fdf4; color: var(--dancheong-green); border: 1px solid #bbf7d0; }
+        
+        .tip { 
+            color: var(--dancheong-red); 
+            font-weight: 600; 
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+        
+        .ctr {
+            background: linear-gradient(90deg, var(--dancheong-gold), #fbbf24);
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        
+        /* ===== 인피드 광고 ===== */
+        .infeed-ad {
+            background: #f9fafb;
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        /* ===== 아카이브 섹션 ===== */
+        .archive-section {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2rem;
+            border: 2px solid var(--dancheong-gold);
+        }
+        
+        .archive-section h3 {
+            color: #92400e;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .archive-list {
+            list-style: none;
+        }
+        
+        .archive-list li {
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border: 1px solid #fde68a;
+            transition: all 0.2s;
+        }
+        
+        .archive-list li:hover {
+            border-color: var(--dancheong-blue);
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+        }
+        
+        .archive-list a {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        /* ===== 푸터 ===== */
+        .site-footer {
+            background: var(--dancheong-blue);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .site-footer p {
+            opacity: 0.8;
+            font-size: 0.85rem;
+        }
+        
+        /* ===== 구분선 ===== */
+        hr { 
+            margin: 2rem 0; 
+            border: none; 
+            border-top: 2px dashed var(--border-color); 
+        }
+        
+        /* ===== 반응형 ===== */
+        @media (max-width: 968px) {
+            .main-wrapper {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .ad-container {
+                flex: 1;
+                min-width: 280px;
+            }
+            
+            .ad-sticky {
+                position: relative;
+                top: 0;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .header-content h1 {
+                font-size: 1.4rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .keyword-item {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="site-header">
+        <div class="header-content">
+            <h1>🎯 블로그 키워드 인사이트</h1>
+            <p>오늘의 뉴스를 분석한 <strong>SEO 최적화 키워드</strong></p>
+            <small>📅 업데이트: 2026년 01월 02일 13시 51분</small>
+        </div>
+    </header>
+
+    <!-- 메인 레이아웃 -->
+    <div class="main-wrapper">
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <section>
+                <div class="keyword-report">
+    <h3>🔥 오늘의 블로그 키워드 TOP 5</h3>
+    
+    <div class="keyword-item">
+        <h4>1. [전기차 전환지원금: 내연차 처분 시 최대 100만원 정부 지원]</h4>
+        
+        <div class="keyword-section">
+            <p><strong>📌 메인 키워드</strong></p>
+            <ul>
+                <li><span class="keyword">"전기차 전환지원금"</span> 
+                    <span class="badge">예상검색량: 일 8만</span>
+                    <span class="badge red">경쟁: 상</span>
+                    <span class="tip">→ 제목에 반드시 포함</span>
+                </li>
+                <li><span class="keyword">"전기차 보조금"</span> 
+                    <span class="badge">예상검색량: 일 5만</span>
+                    <span class="badge orange">경쟁: 중</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>🎯 롱테일 키워드 (노리기 쉬움)</strong></p>
+            <ul>
+                <li><span class="keyword">"내연차 처분 후 전기차 구매 지원금"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                    <span class="tip">→ 초보 블로거 추천</span>
+                </li>
+                <li><span class="keyword">"2025년 전기차 전환지원금 신청방법"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                </li>
+                <li><span class="keyword">"전기차 전환 100만원 추가 지원 조건"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>❓ 실제 검색 쿼리 (질문형)</strong></p>
+            <ul>
+                <li>"전기차 전환지원금 누가 받을 수 있나요?"</li>
+                <li>"내연차 폐차하고 전기차 사면 얼마나 지원?"</li>
+                <li>"전기차 전환지원금 신청방법 총정리"</li>
+                <li>"전기차 보조금 100만원 추가 조건은?"</li>
+            </ul>
+            <p class="small-tip">💡 이 질문들을 제목이나 소제목으로 사용하면 상위 노출 확률 UP</p>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>✨ 추천 제목 조합 (CTR 높은 순)</strong></p>
+            <ol>
+                <li><strong>"[메인키워드] + [금액] + [조건]"</strong> 
+                    <span class="ctr">예상 CTR 9%</span>
+                    <br><span class="example">예: "전기차 전환지원금 100만원 받는 방법 총정리"</span>
+                </li>
+                <li><strong>"[시기] + [메인키워드] + [혜택]"</strong> 
+                    <span class="ctr">예상 CTR 8%</span>
+                    <br><span class="example">예: "2025년 전기차 전환지원금 최대 혜택 받기"</span>
+                </li>
+                <li><strong>"[대상] + [메인키워드] + [체크리스트]"</strong> 
+                    <span class="ctr">예상 CTR 7%</span>
+                    <br><span class="example">예: "내연차 소유자 필독! 전기차 전환지원금 체크리스트"</span>
+                </li>
+            </ol>
+        </div>
+        
+        <div class="meta-info">
+            <p>
+                <span class="tag">⏰ 작성권장: 12시간 이내</span>
+                <span class="tag">💰 수익성: 최상</span>
+                <span class="tag">🎯 난이도: 중</span>
+                <span class="tag">📊 예상유입: 2만~3만</span>
+            </p>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <div class="keyword-item">
+        <h4>2. [곽튜브 다이어트: 17kg 감량 성공 비결 화제]</h4>
+        
+        <div class="keyword-section">
+            <p><strong>📌 메인 키워드</strong></p>
+            <ul>
+                <li><span class="keyword">"곽튜브 다이어트"</span> 
+                    <span class="badge">예상검색량: 일 6만</span>
+                    <span class="badge orange">경쟁: 중</span>
+                    <span class="tip">→ 제목에 반드시 포함</span>
+                </li>
+                <li><span class="keyword">"곽튜브 17kg 감량"</span> 
+                    <span class="badge">예상검색량: 일 3만</span>
+                    <span class="badge orange">경쟁: 중</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>🎯 롱테일 키워드 (노리기 쉬움)</strong></p>
+            <ul>
+                <li><span class="keyword">"곽튜브 다이어트 운동 루틴"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                    <span class="tip">→ 초보 블로거 추천</span>
+                </li>
+                <li><span class="keyword">"곽튜브 17kg 감량 식단 공개"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                </li>
+                <li><span class="keyword">"곽튜브 체지방 감량 운동법"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>❓ 실제 검색 쿼리 (질문형)</strong></p>
+            <ul>
+                <li>"곽튜브 어떻게 17kg 뺐나?"</li>
+                <li>"곽튜브 다이어트 운동 뭐했나?"</li>
+                <li>"곽튜브 다이어트 전후 비교"</li>
+                <li>"곽튜브 살빼기 비법은?"</li>
+            </ul>
+            <p class="small-tip">💡 이 질문들을 제목이나 소제목으로 사용하면 상위 노출 확률 UP</p>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>✨ 추천 제목 조합 (CTR 높은 순)</strong></p>
+            <ol>
+                <li><strong>"[인물] + [성과] + [비법공개]"</strong> 
+                    <span class="ctr">예상 CTR 10%</span>
+                    <br><span class="example">예: "곽튜브 17kg 감량 비법 완벽정리 (운동+식단)"</span>
+                </li>
+                <li><strong>"[기간] + [성과] + [방법]"</strong> 
+                    <span class="ctr">예상 CTR 8%</span>
+                    <br><span class="example">예: "3개월만에 17kg 뺀 곽튜브 다이어트 따라하기"</span>
+                </li>
+                <li><strong>"[전후비교] + [메인키워드]"</strong> 
+                    <span class="ctr">예상 CTR 9%</span>
+                    <br><span class="example">예: "충격! 곽튜브 다이어트 전후 몸매변화"</span>
+                </li>
+            </ol>
+        </div>
+        
+        <div class="meta-info">
+            <p>
+                <span class="tag">⏰ 작성권장: 24시간 이내</span>
+                <span class="tag">💰 수익성: 상</span>
+                <span class="tag">🎯 난이도: 하</span>
+                <span class="tag">📊 예상유입: 1.5만~2만</span>
+            </p>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <div class="keyword-item">
+        <h4>3. [종각 택시 돌진 사고: 70대 운전자, 1명 사망 9명 부상]</h4>
+        
+        <div class="keyword-section">
+            <p><strong>📌 메인 키워드</strong></p>
+            <ul>
+                <li><span class="keyword">"종각 택시 사고"</span> 
+                    <span class="badge">예상검색량: 일 10만</span>
+                    <span class="badge red">경쟁: 상</span>
+                    <span class="tip">→ 제목에 반드시 포함</span>
+                </li>
+                <li><span class="keyword">"종각 택시 돌진"</span> 
+                    <span class="badge">예상검색량: 일 7만</span>
+                    <span class="badge red">경쟁: 상</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>🎯 롱테일 키워드 (노리기 쉬움)</strong></p>
+            <ul>
+                <li><span class="keyword">"종각 택시 사고 원인 급발진"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                    <span class="tip">→ 초보 블로거 추천</span>
+                </li>
+                <li><span class="keyword">"종각역 택시 돌진 사고 피해자"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                </li>
+                <li><span class="keyword">"70대 택시기사 종각 사고 보상"</span> 
+                    <span class="badge green">경쟁: 하</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>❓ 실제 검색 쿼리 (질문형)</strong></p>
+            <ul>
+                <li>"종각 택시 사고 급발진인가?"</li>
+                <li>"종각 택시 사고 보상 어떻게?"</li>
+                <li>"종각역 사고 원인은?"</li>
+                <li>"택시 사고 피해자 보상금은?"</li>
+            </ul>
+            <p class="small-tip">💡 이 질문들을 제목이나 소제목으로 사용하면 상위 노출 확률 UP</p>
+        </div>
+        
+        <div class="keyword-section">
+            <p><strong>✨ 추천 제목 조합 (CTR 높은 순)</strong></p>
+            <ol>
+                <li><strong>"[속보] + [장소] + [사고내용]"</strong> 
+                    <span class="ctr">예상 CTR 11%</span>
+                    <br><span class="example">예: "[속보] 종각 택시 돌진 사고, 1명 사망 9명 부상"</span>
+                </li>
+                <li><strong>"[원인추측] + [메인키워드]"</strong> 
+                    <span class="ctr">예상 CTR 9%</span>
+                    <br><span class="example">예: "종각 택시 사고 급발진 의혹? 70대 운전자 진술은"</span>
+                </li>
+                <li><strong>"[피해규모] + [장소] + [상황]"</strong> 
+                    <span class="ctr">예상 CTR 8%</span>
+                    <br><span class="example">예: "10명 사상 종각역 택시 돌진, 현장 상황 정리"</span>
+                </li>
+            </ol>
+        </div>
+        
+        <div class="meta-info">
+            <p>
+                <span class="tag">⏰ 작성권장: 6시간 이내</span>
+                <span class="tag">💰 수익성: 중상</span>
+                <span class="tag">🎯 난이도: 중</span>
+                <span class="tag">📊 예상유입: 2만~3만</span>
+            </p>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <div class="keyword-item">
+        <h4>4. [강남 집값 30억 시대: 부동산 양극화 역대 최고]</h4>
+        
+        <div class="keyword-section">
+            <p><strong>📌 메인 키워드</strong></p>
+            <ul>
+                <li><span class="keyword">"강남 집값 30억"</span> 
+                    <span class="badge">예상검색량: 일 4만</span>
+                    <span class="badge orange">경쟁: 중</span>
+                    <span class="tip">→ 제목에 반드시 포함</span>
+                </li>
+                <li><span class="keyword">"집값 양극화"</span> 
+                    <span class="badge">예상검색량: 일 2만</span>
+                    <span class="badge orange">경쟁: 중</span>
+                </li>
+            </ul
+            </section>
+            
+            <!-- 🔴 인피드 광고 (콘텐츠 중간) -->
+            <div class="infeed-ad">
+                <p class="ad-label">Advertisement</p>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6677996696534146"
+                     data-ad-slot="2800647401"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            
+            <!-- 아카이브 섹션 (있다면) -->
+            {{archive_section}}
+        </main>
+
+        <!-- 사이드바 (광고) -->
+        <aside class="sidebar">
+            <div class="ad-sticky">
+                <!-- 🔴 사이드레일 광고 1 -->
+                <div class="ad-container">
+                    <p class="ad-label">Sponsored</p>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-6677996696534146"
+                         data-ad-slot="2800647401"
+                         data-ad-format="vertical"
+                         data-full-width-responsive="false"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                
+                <!-- 🔴 사이드레일 광고 2 -->
+                <div class="ad-container" style="margin-top: 1.5rem;">
+                    <p class="ad-label">Sponsored</p>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-6677996696534146"
+                         data-ad-slot="2800647401"
+                         data-ad-format="rectangle"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="site-footer">
+        <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
+    </footer>
+</body>
+</html>

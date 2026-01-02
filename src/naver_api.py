@@ -9,20 +9,15 @@ class NaverAPI:
     """네이버 광고 API + 검색 API로 키워드 데이터 조회"""
     
     def __init__(self):
-        # 광고 API (검색량 조회)
         self.ad_client_id = os.environ.get("NAVER_AD_CLIENT_ID")
         self.ad_client_secret = os.environ.get("NAVER_AD_CLIENT_SECRET")
         self.ad_customer_id = os.environ.get("NAVER_AD_CUSTOMER_ID")
-        
-        # 검색 API (문서수 조회)
         self.search_client_id = os.environ.get("NAVER_CLIENT_ID")
         self.search_client_secret = os.environ.get("NAVER_CLIENT_SECRET")
     
     def _get_header(self, method, uri):
         """광고 API 헤더 생성"""
         timestamp = str(round(time.time() * 1000))
-        
-        # 서명 생성
         sign = f"{timestamp}.{method}.{uri}"
         signature = hmac.new(
             self.ad_client_secret.encode(),
@@ -39,9 +34,7 @@ class NaverAPI:
         }
     
     def get_search_volume(self, keywords):
-        """
-        네이버 광고 API로 월간검색량 조회
-        """
+        """네이버 광고 API로 월간검색량 조회"""
         if not all([self.ad_client_id, self.ad_client_secret, self.ad_customer_id]):
             print("    ❌ [NaverAPI] 광고 API 키가 없습니다.")
             return {}
@@ -49,25 +42,30 @@ class NaverAPI:
         BASE_URL = "https://api.naver.com"
         uri = "/keywordstool"
         method = "GET"
-        
         results = {}
         
-        # 키워드를 100개씩 나눠서 요청
-        for i in range(0, len(keywords), 100):
-            batch = keywords[i:i+100]
+        # 키워드를 5개씩 나눠서 요청 (안정성 향상)
+        for i in range(0, len(keywords), 5):
+            batch = keywords[i:i+5]
+            
+            # 키워드 정리
+            cleaned_batch = []
+            for kw in batch:
+                kw = kw.strip().replace(" ", "")
+                if kw and len(kw) > 1:
+                    cleaned_batch.append(kw)
+            
+            if not cleaned_batch:
+                continue
             
             headers = self._get_header(method, uri)
             params = {
-                "hintKeywords": ",".join(batch),
+                "hintKeywords": ",".join(cleaned_batch),
                 "showDetail": "1"
             }
-            
+            print(f"    [DEBUG] 요청 키워드: {cleaned_batch}")
             try:
-                response = requests.get(
-                    BASE_URL + uri,
-                    headers=headers,
-                    params=params
-                )
+                response = requests.get(BASE_URL + uri, headers=headers, params=params)
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -76,7 +74,6 @@ class NaverAPI:
                         pc_volume = item.get("monthlyPcQcCnt", 0)
                         mobile_volume = item.get("monthlyMobileQcCnt", 0)
                         
-                        # "< 10" 같은 문자열 처리
                         if isinstance(pc_volume, str):
                             pc_volume = 10
                         if isinstance(mobile_volume, str):
@@ -84,13 +81,12 @@ class NaverAPI:
                             
                         results[keyword] = pc_volume + mobile_volume
                 else:
-                    print(f"    ❌ [NaverAPI] 광고 API 에러: {response.status_code}")
-                    print(f"    ❌ [NaverAPI] 응답 내용: {response.text}")
+                    print(f"    ⚠️ [NaverAPI] 일부 키워드 조회 실패: {response.status_code}")
                     
             except Exception as e:
-                print(f"    ❌ [NaverAPI] 광고 API 요청 실패: {e}")
+                print(f"    ⚠️ [NaverAPI] 요청 실패: {e}")
             
-            time.sleep(0.1)
+            time.sleep(0.2)
         
         return results
     
@@ -103,11 +99,7 @@ class NaverAPI:
             "X-Naver-Client-Id": self.search_client_id,
             "X-Naver-Client-Secret": self.search_client_secret
         }
-        
-        params = {
-            "query": keyword,
-            "display": 1
-        }
+        params = {"query": keyword, "display": 1}
         
         try:
             response = requests.get(
@@ -115,62 +107,57 @@ class NaverAPI:
                 headers=headers,
                 params=params
             )
-            
             if response.status_code == 200:
-                data = response.json()
-                return data.get("total", 0)
-            else:
-                return 0
-                
-        except Exception as e:
+                return response.json().get("total", 0)
+            return 0
+        except:
             return 0
     
     def analyze_keywords(self, keywords):
-        """
-        키워드 리스트를 분석해서 검색량, 문서수, 포화도 계산
-        """
-        print(f"    📊 [NaverAPI] {len(keywords)}개 키워드 분석 시작...")
+    """키워드 분석: 검색량, 문서수, 포화도 계산"""
+    print(f"    📊 [NaverAPI] {len(keywords)}개 키워드 분석 시작...")
+    
+    print("    🔍 검색량 조회 중...")
+    search_volumes = self.get_search_volume(keywords)
+    print(f"    ✅ {len(search_volumes)}개 키워드 검색량 조회 완료")
+    
+    # 검색량 높은 순으로 정렬 후 상위 100개만 선택
+    sorted_keywords = sorted(search_volumes.items(), key=lambda x: x[1], reverse=True)[:100]
+    
+    print(f"    📝 블로그 문서수 조회 중... (상위 {len(sorted_keywords)}개)")
+    results = []
+    
+    for keyword, volume in sorted_keywords:
+        if volume == 0:
+            continue
         
-        # 1. 검색량 조회
-        print("    🔍 검색량 조회 중...")
-        search_volumes = self.get_search_volume(keywords)
+        blog_count = self.get_blog_count(keyword)
+        time.sleep(0.05)
         
-        # 2. 문서수 조회
-        print("    📝 블로그 문서수 조회 중...")
-        results = []
+        saturation = round(blog_count / volume, 2) if volume > 0 else 999
         
-        for keyword in keywords:
-            volume = search_volumes.get(keyword, 0)
-            
-            if volume == 0:
-                continue
-            
-            blog_count = self.get_blog_count(keyword)
-            time.sleep(0.1)
-            
-            if volume > 0:
-                saturation = round(blog_count / volume, 2)
-            else:
-                saturation = 999
-            
-            if saturation <= 0.3:
-                possibility = "🟢 매우높음"
-            elif saturation <= 0.5:
-                possibility = "🟡 높음"
-            elif saturation <= 1.0:
-                possibility = "🟠 보통"
-            else:
-                possibility = "🔴 낮음"
-            
-            results.append({
-                "keyword": keyword,
-                "monthly_search": volume,
-                "blog_count": blog_count,
-                "saturation": saturation,
-                "possibility": possibility
-            })
+        if saturation <= 0.3:
+            possibility = "🟢 매우높음"
+        elif saturation <= 0.5:
+            possibility = "🟡 높음"
+        elif saturation <= 1.0:
+            possibility = "🟠 보통"
+        else:
+            possibility = "🔴 낮음"
         
-        results.sort(key=lambda x: x["saturation"])
-        
-        print(f"    ✅ {len(results)}개 키워드 분석 완료")
-        return results
+        results.append({
+            "keyword": keyword,
+            "monthly_search": volume,
+            "blog_count": blog_count,
+            "saturation": saturation,
+            "possibility": possibility
+        })
+    
+    # 포화도 낮은 순으로 정렬
+    results.sort(key=lambda x: x["saturation"])
+    
+    # 포화도 0.3 이하만 필터링 (매우높음만)
+    results = [r for r in results if r["saturation"] <= 0.3]
+    
+    print(f"    ✅ {len(results)}개 키워드 분석 완료 (상위노출 가능 키워드)")
+    return results
