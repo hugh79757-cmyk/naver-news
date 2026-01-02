@@ -2,60 +2,42 @@ name: AI News Reporter
 
 on:
   schedule:
-    - cron: '0 23,3,9,13 * * *'  # UTC 기준
+    - cron: '0 23,3,9,13 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
 
-concurrency:
-  group: ai-news-reporter
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: 저장소 체크아웃
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - name: 저장소 체크아웃
+      uses: actions/checkout@v3
 
-      - name: Python 3.12 설정
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          check-latest: true
-          cache: 'pip'
+    - name: 파이썬 설정
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
-      - name: Python 버전 확인
-        run: python --version
+    - name: 라이브러리 설치
+      run: |
+        pip install --upgrade pip
+        pip uninstall -y anthropic httpx || true
+        pip install --no-cache-dir -r requirements.txt
 
-      - name: 패키지 설치
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: 뉴스 봇 실행
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+      run: |
+        python main.py
 
-      - name: 뉴스 봇 실행
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
-        run: |
-          python main.py
-
-      - name: 결과 저장 및 배포
-        env:
-          TZ: Asia/Seoul
-        run: |
-          git config --global user.name 'NewsBot'
-          git config --global user.email 'bot@noreply.github.com'
-
-          mkdir -p output
-          git add output/
-
-          if git diff --staged --quiet; then
-            echo "변경사항 없음"
-          else
-            git commit -m "📰 AI 뉴스 리포트 업데이트 $(date +'%Y-%m-%d %H:%M')"
-            git push origin main
-          fi
+    - name: 결과 저장 및 배포
+      run: |
+        git config --global user.name 'NewsBot'
+        git config --global user.email 'bot@noreply.github.com'
+        git add output/
+        git commit -m "📰 AI 뉴스 리포트 업데이트" || exit 0
+        git push -f origin main
