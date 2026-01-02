@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>블로그 키워드 인사이트 - SEO 분석 리포트</title>
+    <title>블로그 키워드 인사이트</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <style>
         body { 
@@ -19,8 +19,6 @@
             margin: 2rem auto;
             padding: 2rem;
         }
-        
-        /* 헤더 */
         header { 
             border-bottom: 3px solid #667eea;
             margin-bottom: 2rem; 
@@ -31,12 +29,6 @@
             color: #667eea;
             margin-bottom: 0.5rem;
         }
-        header p {
-            color: #6c757d;
-            font-size: 1.1rem;
-        }
-        
-        /* 키워드 아이템 */
         .keyword-item {
             background: #f8f9ff;
             border-left: 4px solid #667eea;
@@ -44,25 +36,6 @@
             margin-bottom: 2rem;
             border-radius: 8px;
         }
-        .keyword-item h4 {
-            color: #2d3748;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-        
-        /* 키워드 섹션 */
-        .keyword-section {
-            margin-bottom: 1.5rem;
-            background: white;
-            padding: 1rem;
-            border-radius: 6px;
-        }
-        .keyword-section strong {
-            color: #667eea;
-            font-size: 1.1rem;
-        }
-        
-        /* 키워드 스타일 */
         .keyword {
             background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -73,8 +46,6 @@
             display: inline-block;
             margin: 4px;
         }
-        
-        /* 배지 */
         .badge {
             background: #e9ecef;
             padding: 3px 10px;
@@ -86,22 +57,12 @@
         .badge.red { background: #fee; color: #c00; }
         .badge.orange { background: #fff3cd; color: #856404; }
         .badge.green { background: #d4edda; color: #155724; }
-        
-        /* 팁 */
         .tip { 
             color: #d81b60; 
             font-weight: bold; 
             font-size: 0.9em;
             margin-left: 10px;
         }
-        .small-tip {
-            color: #6c757d;
-            font-size: 0.9rem;
-            font-style: italic;
-            margin-top: 0.5rem;
-        }
-        
-        /* CTR */
         .ctr {
             background: #ffd700;
             color: #000;
@@ -109,51 +70,7 @@
             border-radius: 4px;
             font-size: 0.85rem;
             font-weight: bold;
-            margin-left: 10px;
         }
-        .example {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-left: 20px;
-        }
-        
-        /* 메타 정보 */
-        .meta-info {
-            background: #fff9e6;
-            padding: 1rem;
-            border-radius: 6px;
-            margin-top: 1rem;
-            border: 1px dashed #ffc107;
-        }
-        .tag {
-            background: white;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 0.9rem;
-            margin-right: 8px;
-            display: inline-block;
-            margin-bottom: 6px;
-            border: 1px solid #dee2e6;
-        }
-        
-        /* 보너스 섹션 */
-        .bonus-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-top: 2rem;
-        }
-        .bonus-section h3 {
-            color: white;
-            margin-bottom: 1rem;
-        }
-        .bonus-section .keyword {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-        
-        /* 푸터 */
         footer { 
             margin-top: 3rem; 
             border-top: 1px solid #eee; 
@@ -162,34 +79,7 @@
             font-size: 0.85em; 
             text-align: center; 
         }
-        
-        /* HR */
-        hr {
-            margin: 2rem 0;
-            border: none;
-            border-top: 2px dashed #e9ecef;
-        }
-        
-        /* 리스트 스타일 */
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        ul li {
-            padding: 8px 0;
-            border-bottom: 1px solid #f1f3f5;
-        }
-        ul li:last-child {
-            border-bottom: none;
-        }
-        
-        ol {
-            padding-left: 1.2rem;
-        }
-        ol li {
-            padding: 10px 0;
-            line-height: 1.8;
-        }
+        hr { margin: 2rem 0; border: none; border-top: 2px dashed #e9ecef; }
     </style>
 </head>
 <body>
@@ -200,16 +90,13 @@
             <small>📅 업데이트: {{date}}</small>
         </header>
 
-        <!-- AI 분석 결과가 여기 삽입됩니다 -->
+        <!-- ⭐ 이 부분에 AI 분석 결과가 들어갑니다 ⭐ -->
         <section>
             {{content}}
         </section>
 
         <footer>
             <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
-            <p style="font-size: 0.8rem; color: #aaa;">
-                이 키워드는 AI 분석 결과이며, 실제 검색량과 다를 수 있습니다.
-            </p>
         </footer>
     </main>
 </body>
