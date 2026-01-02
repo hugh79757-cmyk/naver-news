@@ -12,8 +12,11 @@ def fetch_naver_ranking_news():
     """
     print("🕷️ [Naver] 언론사별 1위 뉴스 수집 중...")
     url = "https://news.naver.com/main/ranking/popularDay.naver"
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
-    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://www.naver.com/",
+        "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"
+    }
     try:
         res = requests.get(url, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -91,4 +94,27 @@ def fetch_policy_api():
 
     except Exception as e:
         print(f"❌ [Policy] API 에러: {e}")
+        return []
+def fetch_daum_news():
+    """ 다음(Daum) 뉴스 랭킹 수집 """
+    print("🕷️ [Daum] 뉴스 랭킹 수집 중...")
+    url = "https://news.daum.net/ranking/popular"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    
+    try:
+        res = requests.get(url, headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        
+        # 다음 뉴스 랭킹 리스트
+        news_list = soup.select('.list_news2 .link_txt')
+        
+        headlines = []
+        for news in news_list[:15]: # 상위 15개
+            title = news.get_text(strip=True)
+            headlines.append(f"[Daum] {title}")
+            
+        print(f"✅ 다음 뉴스 {len(headlines)}개 수집 완료")
+        return headlines
+    except Exception as e:
+        print(f"❌ [Daum] 에러: {e}")
         return []
