@@ -44,4 +44,4 @@ jobs:
         
         # 변경사항이 있으면 커밋하고 푸시
         git commit -m "📰 AI 뉴스 리포트 업데이트" || exit 0
-        git push
+        git push -f origin main 
