@@ -158,19 +158,14 @@ class NaverAPI:
     
     def get_autocomplete(self, keyword):
         """네이버 자동완성으로 연관검색어 조회"""
-        url = "https://ac.search.naver.com/nx/ac"
+        url = "https://mac.search.naver.com/mobile/ac"
         params = {
             "q": keyword,
-            "con": "1",
-            "frm": "nv",
-            "ans": "2",
+            "st": "1",
             "r_format": "json",
             "r_enc": "UTF-8",
             "r_unicode": "0",
-            "t_koreng": "1",
-            "run": "2",
-            "rev": "4",
-            "q_enc": "UTF-8"
+            "t_koreng": "1"
         }
         
         try:
@@ -178,8 +173,10 @@ class NaverAPI:
             if response.status_code == 200:
                 data = response.json()
                 items = data.get("items", [[]])[0]
+                # 자기 자신 제외하고 5개 반환
                 results = [item[0] for item in items if item[0] != keyword][:5]
                 return results
         except:
             pass
         return []
+
