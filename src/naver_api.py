@@ -82,7 +82,7 @@ class NaverAPI:
                 else:
                     print(f"    ⚠️ [NaverAPI] 일부 키워드 조회 실패: {response.status_code}")
                     print(f"    ⚠️ [NaverAPI] 에러 내용: {response.text}")
-                except Exception as e:
+            except Exception as e:
                 print(f"    ⚠️ [NaverAPI] 요청 실패: {e}")
             
             time.sleep(0.2)
@@ -155,3 +155,31 @@ class NaverAPI:
         
         print(f"    ✅ {len(results)}개 키워드 분석 완료")
         return results
+    
+    def get_autocomplete(self, keyword):
+        """네이버 자동완성으로 연관검색어 조회"""
+        url = "https://ac.search.naver.com/nx/ac"
+        params = {
+            "q": keyword,
+            "con": "1",
+            "frm": "nv",
+            "ans": "2",
+            "r_format": "json",
+            "r_enc": "UTF-8",
+            "r_unicode": "0",
+            "t_koreng": "1",
+            "run": "2",
+            "rev": "4",
+            "q_enc": "UTF-8"
+        }
+        
+        try:
+            response = requests.get(url, params=params, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                items = data.get("items", [[]])[0]
+                results = [item[0] for item in items if item[0] != keyword][:5]
+                return results
+        except:
+            pass
+        return []

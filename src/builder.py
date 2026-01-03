@@ -1,9 +1,8 @@
 import os
-import re
 from datetime import datetime
 import shutil
 
-def build_keyword_report(keyword_results):
+def build_keyword_report(keyword_results, related_data=None):
     """키워드 분석 결과를 HTML 테이블로 변환"""
     
     if not keyword_results:
@@ -16,9 +15,6 @@ def build_keyword_report(keyword_results):
     if len(top_keywords) < 50:
         remaining = [r for r in keyword_results if r not in top_keywords]
         top_keywords += remaining[:50 - len(top_keywords)]
-    
-    # 나머지는 연관검색어로
-    related_keywords = [r["keyword"] for r in keyword_results if r not in top_keywords][:100]
     
     html = """
     <div class="keyword-report">
@@ -34,20 +30,24 @@ def build_keyword_report(keyword_results):
                     <th>블로그문서수</th>
                     <th>포화도</th>
                     <th>상위노출</th>
+                    <th>분석</th>
                 </tr>
             </thead>
             <tbody>
     """
     
     for idx, item in enumerate(top_keywords, 1):
+        keyword = item['keyword']
+        naver_url = f"https://search.naver.com/search.naver?query={keyword}"
         html += f"""
                 <tr>
                     <td>{idx}</td>
-                    <td><strong>{item['keyword']}</strong></td>
+                    <td><strong>{keyword}</strong></td>
                     <td>{item['monthly_search']:,}</td>
                     <td>{item['blog_count']:,}</td>
                     <td>{item['saturation']}</td>
                     <td>{item['possibility']}</td>
+                    <td><a href="{naver_url}" target="_blank" class="analyze-btn">🔍</a></td>
                 </tr>
         """
     
@@ -57,17 +57,39 @@ def build_keyword_report(keyword_results):
     </div>
     """
     
-    # 연관검색어 테이블
-    if related_keywords:
+    # 상위 20개 연관검색어 섹션
+    if related_data:
         html += """
     <div class="related-keywords">
-        <h3>🔗 연관 검색어</h3>
-        <p class="update-info">오늘 뉴스에서 추출된 연관 키워드입니다.</p>
+        <h3>🔗 상위 20개 키워드 연관검색어</h3>
+        <p class="update-info">네이버 자동완성 기반 연관검색어입니다.</p>
         
-        <div class="keyword-tags">
+        <div class="related-grid">
     """
-        for kw in related_keywords:
-            html += f'<span class="keyword-tag">{kw}</span>\n'
+        for item in related_data:
+            keyword = item['keyword']
+            related = item['related']
+            naver_url = f"https://search.naver.com/search.naver?query={keyword}"
+            
+            html += f"""
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>{keyword}</strong>
+                    <a href="{naver_url}" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            """
+            for rel_kw in related:
+                rel_url = f"https://search.naver.com/search.naver?query={rel_kw}"
+                html += f'<li><a href="{rel_url}" target="_blank">{rel_kw}</a></li>'
+            
+            if not related:
+                html += '<li class="no-data">연관검색어 없음</li>'
+            
+            html += """
+                </ul>
+            </div>
+            """
         
         html += """
         </div>
@@ -179,4 +201,3 @@ def generate_archive_list(archive_dir):
     
     html += '</ul></div>'
     return html
-

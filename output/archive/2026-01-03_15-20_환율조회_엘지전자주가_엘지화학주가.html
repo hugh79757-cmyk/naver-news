@@ -13,12 +13,13 @@
     
     <style>
         :root {
-            --dancheong-blue: #1e3a8a;
-            --dancheong-red: #dc2626;
-            --dancheong-gold: #f59e0b;
-            --dancheong-green: #166534;
-            --dancheong-white: #fefefe;
-            --dancheong-light: #f0f4ff;
+            /* 단청 색상 팔레트 */
+            --dancheong-blue: #1e3a8a;      /* 청색 (메인) */
+            --dancheong-red: #dc2626;       /* 적색 (강조) */
+            --dancheong-gold: #f59e0b;      /* 금색 (포인트) */
+            --dancheong-green: #166534;     /* 녹색 */
+            --dancheong-white: #fefefe;     /* 백색 */
+            --dancheong-light: #f0f4ff;     /* 연한 배경 */
             --text-primary: #1f2937;
             --text-secondary: #6b7280;
             --border-color: #e5e7eb;
@@ -137,115 +138,66 @@
             top: 1rem;
         }
         
-        /* ===== 키워드 테이블 ===== */
-        .keyword-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 14px;
+        /* ===== 키워드 아이템 (기존 스타일 업그레이드) ===== */
+        .keyword-item {
+            background: linear-gradient(135deg, var(--dancheong-light) 0%, #fff 100%);
+            border-left: 5px solid var(--dancheong-blue);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0 12px 12px 0;
+            transition: all 0.3s ease;
         }
         
-        .keyword-table th,
-        .keyword-table td {
-            border: 1px solid #ddd;
-            padding: 12px 8px;
-            text-align: center;
+        .keyword-item:hover {
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            transform: translateX(4px);
         }
         
-        .keyword-table th {
-            background-color: var(--dancheong-blue);
-            color: white;
-            font-weight: bold;
-        }
-        
-        .keyword-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .keyword-table tr:hover {
-            background-color: #f1f1f1;
-        }
-        
-        .keyword-table td:nth-child(2) {
-            text-align: left;
-        }
-        
-        .update-info {
-            color: #666;
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-        
-        /* ===== 분석 버튼 ===== */
-        .analyze-btn {
-            display: inline-block;
-            padding: 4px 8px;
-            background: #03c75a;
-            color: white;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        
-        .analyze-btn:hover {
-            background: #02a94e;
-        }
-        
-        /* ===== 연관검색어 그리드 ===== */
-        .related-keywords {
-            margin-top: 2rem;
-        }
-        
-        .related-keywords h3 {
+        .keyword-item h4 {
             color: var(--dancheong-blue);
-            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px dashed var(--border-color);
         }
         
-        .related-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
+        .keyword {
+            background: linear-gradient(120deg, var(--dancheong-blue) 0%, #3b82f6 100%);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin: 4px;
         }
         
-        .related-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid #e9ecef;
+        .badge {
+            background: #e5e7eb;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: 6px;
+        }
+        .badge.red { background: #fef2f2; color: var(--dancheong-red); border: 1px solid #fecaca; }
+        .badge.orange { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .badge.green { background: #f0fdf4; color: var(--dancheong-green); border: 1px solid #bbf7d0; }
+        
+        .tip { 
+            color: var(--dancheong-red); 
+            font-weight: 600; 
+            font-size: 0.85rem;
+            margin-left: 8px;
         }
         
-        .related-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .related-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .related-list li {
-            padding: 4px 0;
-        }
-        
-        .related-list li a {
-            color: #495057;
-            text-decoration: none;
-        }
-        
-        .related-list li a:hover {
-            color: #03c75a;
-        }
-        
-        .related-list .no-data {
-            color: #adb5bd;
-            font-style: italic;
+        .ctr {
+            background: linear-gradient(90deg, var(--dancheong-gold), #fbbf24);
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
         }
         
         /* ===== 인피드 광고 ===== */
@@ -275,12 +227,6 @@
             gap: 0.5rem;
         }
         
-        .archive-info {
-            color: #92400e;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-        
         .archive-list {
             list-style: none;
         }
@@ -304,16 +250,6 @@
             padding: 12px 16px;
             color: var(--text-primary);
             text-decoration: none;
-        }
-        
-        .archive-date {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-        
-        .archive-keywords {
-            font-size: 0.85rem;
-            color: var(--dancheong-blue);
         }
         
         /* ===== 푸터 ===== */
@@ -357,10 +293,6 @@
                 position: relative;
                 top: 0;
             }
-            
-            .related-grid {
-                grid-template-columns: 1fr;
-            }
         }
         
         @media (max-width: 640px) {
@@ -372,15 +304,50 @@
                 padding: 1rem;
             }
             
-            .keyword-table {
-                font-size: 12px;
-            }
-            
-            .keyword-table th,
-            .keyword-table td {
-                padding: 8px 4px;
+            .keyword-item {
+                padding: 1rem;
             }
         }
+   
+        .keyword-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+}
+
+.keyword-table th,
+.keyword-table td {
+    border: 1px solid #ddd;
+    padding: 12px 8px;
+    text-align: center;
+}
+
+.keyword-table th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+}
+
+.keyword-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.keyword-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.keyword-table td:nth-child(2) {
+    text-align: left;
+}
+
+.update-info {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+   
     </style>
 </head>
 <body>
@@ -389,7 +356,7 @@
         <div class="header-content">
             <h1>🎯 블로그 키워드 인사이트</h1>
             <p>오늘의 뉴스를 분석한 <strong>SEO 최적화 키워드</strong></p>
-            <small>📅 업데이트: {{date}}</small>
+            <small>📅 업데이트: 2026년 01월 03일 05시 01분</small>
         </div>
     </header>
 
@@ -398,7 +365,7 @@
         <!-- 메인 콘텐츠 -->
         <main class="main-content">
             <section>
-                {{content}}
+                <p>분석된 키워드가 없습니다.</p>
             </section>
             
             <!-- 🔴 인피드 광고 (콘텐츠 중간) -->
@@ -415,8 +382,8 @@
                 </script>
             </div>
             
-            <!-- 아카이브 섹션 -->
-            {{archive_list}}
+            <!-- 아카이브 섹션 (있다면) -->
+            {{archive_section}}
         </main>
 
         <!-- 사이드바 (광고) -->

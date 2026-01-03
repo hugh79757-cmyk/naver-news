@@ -68,20 +68,31 @@ def main():
     
     print(f"    ✅ {len(keywords)}개 키워드 추출 완료!")
 
-        # 7. 네이버 API로 키워드 분석
+    # 7. 네이버 API로 키워드 분석
     print("\n[7/8] 네이버 API 키워드 분석 중...")
     naver_api = NaverAPI()
     keyword_results = naver_api.analyze_keywords(keywords)
+    
+    # 상위 20개 키워드 연관검색어 조회
+    related_data = []
+    if keyword_results:
+        print("    🔍 연관검색어 조회 중... (상위 20개)")
+        for item in keyword_results[:20]:
+            related = naver_api.get_autocomplete(item['keyword'])
+            related_data.append({
+                'keyword': item['keyword'],
+                'related': related
+            })
+        print(f"    ✅ 연관검색어 조회 완료")
     
     # 결과가 없어도 계속 진행
     if not keyword_results:
         print("    ⚠️ 상위노출 가능 키워드가 없습니다. 전체 결과로 진행합니다.")
         keyword_results = []
 
-
     # 8. HTML 파일 생성
     print("\n[8/8] HTML 리포트 생성 중...")
-    keyword_report = builder.build_keyword_report(keyword_results)
+    keyword_report = builder.build_keyword_report(keyword_results, related_data)
     builder.build_html_file(keyword_report, keyword_results)
     
     print("\n" + "=" * 60)
