@@ -9,8 +9,9 @@ def build_keyword_report(keyword_results, related_data=None):
         return "<p>분석된 키워드가 없습니다.</p>"
     
     # 포화도 1 이하만 선택
-top_keywords = [r for r in keyword_results if r["saturation"] <= 1.0][:50]   
-html = """
+    top_keywords = [r for r in keyword_results if r["saturation"] <= 1.0][:50]
+    
+    html = """
     <div class="keyword-report">
         <h3>📊 상위노출 가능 키워드 TOP 50</h3>
         <p class="update-info">포화도 = 블로그문서수 ÷ 월간검색량 (낮을수록 상위노출 쉬움)</p>
