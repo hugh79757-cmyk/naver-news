@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그 키워드 인사이트</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- 🔴 Google AdSense 자동광고 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
+        crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --dancheong-blue: #1e3a8a;
+            --dancheong-red: #dc2626;
+            --dancheong-gold: #f59e0b;
+            --dancheong-green: #166534;
+            --dancheong-white: #fefefe;
+            --dancheong-light: #f0f4ff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, var(--dancheong-light) 0%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* ===== 헤더 - 단청 패턴 ===== */
+        .site-header {
+            background: linear-gradient(135deg, var(--dancheong-blue) 0%, #1e40af 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(90deg,
+                    var(--dancheong-red) 0px,
+                    var(--dancheong-red) 20px,
+                    var(--dancheong-gold) 20px,
+                    var(--dancheong-gold) 40px,
+                    var(--dancheong-blue) 40px,
+                    var(--dancheong-blue) 60px,
+                    var(--dancheong-green) 60px,
+                    var(--dancheong-green) 80px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .header-content h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-content p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .header-content small {
+            display: inline-block;
+            margin-top: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* ===== 메인 레이아웃 (1열 - 사이드바 제거) ===== */
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        /* ===== 키워드 테이블 ===== */
+        .keyword-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .keyword-table th,
+        .keyword-table td {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .keyword-table th {
+            background-color: var(--dancheong-blue);
+            color: white;
+            font-weight: bold;
+        }
+
+        .keyword-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .keyword-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .keyword-table td:nth-child(2) {
+            text-align: left;
+        }
+
+        .update-info {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== 분석 버튼 ===== */
+        .analyze-btn {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #03c75a;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .analyze-btn:hover {
+            background: #02a94e;
+        }
+
+        /* ===== 연관검색어 그리드 ===== */
+        .related-keywords {
+            margin-top: 2rem;
+        }
+
+        .related-keywords h3 {
+            color: var(--dancheong-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .related-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e9ecef;
+        }
+
+        .related-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .related-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .related-list li {
+            padding: 4px 0;
+        }
+
+        .related-list li a {
+            color: #495057;
+            text-decoration: none;
+        }
+
+        .related-list li a:hover {
+            color: #03c75a;
+        }
+
+        .related-list .no-data {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* ===== 아카이브 버튼 ===== */
+        .archive-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--dancheong-gold) 0%, #f59e0b 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .archive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        /* ===== 푸터 ===== */
+        .site-footer {
+            background: var(--dancheong-blue);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .site-footer p {
+            opacity: 0.8;
+            font-size: 0.85rem;
+        }
+
+        /* ===== 테이블 정렬 ===== */
+        .keyword-table th {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .keyword-table th:hover {
+            background-color: #1e40af;
+        }
+
+        .keyword-table th::after {
+            content: ' ⇅';
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        .keyword-table th.asc::after {
+            content: ' ▲';
+            opacity: 1;
+        }
+
+        .keyword-table th.desc::after {
+            content: ' ▼';
+            opacity: 1;
+        }
+
+        /* ===== 반응형 ===== */
+        @media (max-width: 768px) {
+            .header-content h1 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .keyword-table {
+                font-size: 12px;
+            }
+
+            .keyword-table th,
+            .keyword-table td {
+                padding: 8px 4px;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 헤더 -->
+    <header class="site-header">
+        <div class="header-content">
+            <h1>🎯 블로그 키워드 인사이트</h1>
+            <p>오늘의 뉴스를 분석한 <strong>SEO 최적화 키워드</strong></p>
+            <small>📅 업데이트: 2026년 01월 03일 20시 55분</small>
+        </div>
+    </header>
+
+    <!-- 메인 레이아웃 -->
+    <div class="main-wrapper">
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <section>
+                
+    <div class="keyword-report">
+        <h3>📊 상위노출 가능 키워드 TOP 50</h3>
+        <p class="update-info">포화도 = 블로그문서수 ÷ 월간검색량 (낮을수록 상위노출 쉬움)</p>
+        
+        <table class="keyword-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>키워드</th>
+                    <th>월간검색량</th>
+                    <th>블로그문서수</th>
+                    <th>포화도</th>
+                    <th>상위노출</th>
+                    <th>분석</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                <tr>
+                    <td>1</td>
+                    <td><strong>사정지연</strong></td>
+                    <td>1,800</td>
+                    <td>0</td>
+                    <td>0.0</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=사정지연" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>2</td>
+                    <td><strong>러브오일</strong></td>
+                    <td>1,110</td>
+                    <td>0</td>
+                    <td>0.0</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=러브오일" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>3</td>
+                    <td><strong>야호맨골드</strong></td>
+                    <td>3,370</td>
+                    <td>124</td>
+                    <td>0.04</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=야호맨골드" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>4</td>
+                    <td><strong>엠빅스</strong></td>
+                    <td>28,260</td>
+                    <td>1,481</td>
+                    <td>0.05</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=엠빅스" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>5</td>
+                    <td><strong>야호맨가격</strong></td>
+                    <td>860</td>
+                    <td>118</td>
+                    <td>0.14</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=야호맨가격" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>6</td>
+                    <td><strong>구구정5MG</strong></td>
+                    <td>2,560</td>
+                    <td>388</td>
+                    <td>0.15</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=구구정5MG" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>7</td>
+                    <td><strong>비아노스</strong></td>
+                    <td>5,320</td>
+                    <td>918</td>
+                    <td>0.17</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=비아노스" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>8</td>
+                    <td><strong>네노마정</strong></td>
+                    <td>1,480</td>
+                    <td>252</td>
+                    <td>0.17</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=네노마정" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>9</td>
+                    <td><strong>팔팔정</strong></td>
+                    <td>18,360</td>
+                    <td>3,327</td>
+                    <td>0.18</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=팔팔정" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>10</td>
+                    <td><strong>비아그라복용법</strong></td>
+                    <td>6,960</td>
+                    <td>1,248</td>
+                    <td>0.18</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=비아그라복용법" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>11</td>
+                    <td><strong>타오르정</strong></td>
+                    <td>1,350</td>
+                    <td>241</td>
+                    <td>0.18</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=타오르정" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>12</td>
+                    <td><strong>야호맨</strong></td>
+                    <td>2,890</td>
+                    <td>630</td>
+                    <td>0.22</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=야호맨" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>13</td>
+                    <td><strong>팔팔정가격</strong></td>
+                    <td>3,880</td>
+                    <td>988</td>
+                    <td>0.25</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=팔팔정가격" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>14</td>
+                    <td><strong>고환피지낭종</strong></td>
+                    <td>2,510</td>
+                    <td>638</td>
+                    <td>0.25</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=고환피지낭종" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>15</td>
+                    <td><strong>씨알리스가격</strong></td>
+                    <td>1,750</td>
+                    <td>511</td>
+                    <td>0.29</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=씨알리스가격" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>16</td>
+                    <td><strong>시알리스가격</strong></td>
+                    <td>1,810</td>
+                    <td>559</td>
+                    <td>0.31</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=시알리스가격" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>17</td>
+                    <td><strong>질윤활재</strong></td>
+                    <td>1,140</td>
+                    <td>350</td>
+                    <td>0.31</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=질윤활재" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>18</td>
+                    <td><strong>씨알리스</strong></td>
+                    <td>6,210</td>
+                    <td>2,065</td>
+                    <td>0.33</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=씨알리스" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>19</td>
+                    <td><strong>구구정복용법</strong></td>
+                    <td>1,220</td>
+                    <td>408</td>
+                    <td>0.33</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=구구정복용법" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>20</td>
+                    <td><strong>시알리스</strong></td>
+                    <td>9,720</td>
+                    <td>4,113</td>
+                    <td>0.42</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=시알리스" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>21</td>
+                    <td><strong>예나스테론</strong></td>
+                    <td>1,120</td>
+                    <td>589</td>
+                    <td>0.53</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=예나스테론" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>22</td>
+                    <td><strong>뜸효과</strong></td>
+                    <td>1,120</td>
+                    <td>885</td>
+                    <td>0.79</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=뜸효과" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>23</td>
+                    <td><strong>베트남전자담배</strong></td>
+                    <td>8,570</td>
+                    <td>7,019</td>
+                    <td>0.82</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=베트남전자담배" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>24</td>
+                    <td><strong>비아그라처방</strong></td>
+                    <td>8,670</td>
+                    <td>8,820</td>
+                    <td>1.02</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=비아그라처방" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>25</td>
+                    <td><strong>비아그라약국</strong></td>
+                    <td>2,880</td>
+                    <td>3,232</td>
+                    <td>1.12</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=비아그라약국" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>26</td>
+                    <td><strong>블랙마카효능</strong></td>
+                    <td>8,470</td>
+                    <td>10,031</td>
+                    <td>1.18</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=블랙마카효능" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>27</td>
+                    <td><strong>조루약</strong></td>
+                    <td>1,350</td>
+                    <td>1,593</td>
+                    <td>1.18</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=조루약" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>28</td>
+                    <td><strong>네비도주사</strong></td>
+                    <td>1,470</td>
+                    <td>1,833</td>
+                    <td>1.25</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=네비도주사" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>29</td>
+                    <td><strong>비아그라처방가격</strong></td>
+                    <td>1,070</td>
+                    <td>1,567</td>
+                    <td>1.46</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=비아그라처방가격" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="related-keywords">
+        <h3>🔗 상위 20개 키워드 연관검색어</h3>
+        <p class="update-info">네이버 자동완성 기반 연관검색어입니다.</p>
+        
+        <div class="related-grid">
+    
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>사정지연</strong>
+                    <a href="https://search.naver.com/search.naver?query=사정지연" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li class="no-data">연관검색어 없음</li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>러브오일</strong>
+                    <a href="https://search.naver.com/search.naver?query=러브오일" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li class="no-data">연관검색어 없음</li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>야호맨골드</strong>
+                    <a href="https://search.naver.com/search.naver?query=야호맨골드" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=야호맨골드가격" target="_blank">야호맨골드가격</a></li><li><a href="https://search.naver.com/search.naver?query=야호맨골드효능" target="_blank">야호맨골드효능</a></li><li><a href="https://search.naver.com/search.naver?query=야호맨골드 구입처" target="_blank">야호맨골드 구입처</a></li><li><a href="https://search.naver.com/search.naver?query=야호맨골드 복용방법" target="_blank">야호맨골드 복용방법</a></li><li><a href="https://search.naver.com/search.naver?query=야호맨골드가격판매처" target="_blank">야호맨골드가격판매처</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>엠빅스</strong>
+                    <a href="https://search.naver.com/search.naver?query=엠빅스" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=엠빅스100" target="_blank">엠빅스100</a></li><li><a href="https://search.naver.com/search.naver?query=엠빅스 효능" target="_blank">엠빅스 효능</a></li><li><a href="https://search.naver.com/search.naver?query=엠빅스 전현무" target="_blank">엠빅스 전현무</a></li><li><a href="https://search.naver.com/search.naver?query=엠빅스에스" target="_blank">엠빅스에스</a></li><li><a href="https://search.naver.com/search.naver?query=엠빅스 가격" target="_blank">엠빅스 가격</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>야호맨가격</strong>
+                    <a href="https://search.naver.com/search.naver?query=야호맨가격" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li class="no-data">연관검색어 없음</li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>구구정5MG</strong>
+                    <a href="https://search.naver.com/search.naver?query=구구정5MG" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=구구정5mg 용법" target="_blank">구구정5mg 용법</a></li><li><a href="https://search.naver.com/search.naver?query=구구정 5mg" target="_blank">구구정 5mg</a></li><li><a href="https://search.naver.com/search.naver?query=구구정 5mg 가격" target="_blank">구구정 5mg 가격</a></li><li><a href="https://search.naver.com/search.naver?query=구구정 5mg 복용법" target="_blank">구구정 5mg 복용법</a></li><li><a href="https://search.naver.com/search.naver?query=구구정 5mg 효능" target="_blank">구구정 5mg 효능</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>비아노스</strong>
+                    <a href="https://search.naver.com/search.naver?query=비아노스" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=비아노스 맥스" target="_blank">비아노스 맥스</a></li><li><a href="https://search.naver.com/search.naver?query=비아노스 블랙마카" target="_blank">비아노스 블랙마카</a></li><li><a href="https://search.naver.com/search.naver?query=비아노스 효과" target="_blank">비아노스 효과</a></li><li><a href="https://search.naver.com/search.naver?query=비아노스맥스최저가" target="_blank">비아노스맥스최저가</a></li><li><a href="https://search.naver.com/search.naver?query=비아노스 후기" target="_blank">비아노스 후기</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>네노마정</strong>
+                    <a href="https://search.naver.com/search.naver?query=네노마정" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=네노마정 후기" target="_blank">네노마정 후기</a></li><li><a href="https://search.naver.com/search.naver?query=네노마정 복용시간" target="_blank">네노마정 복용시간</a></li><li><a href="https://search.naver.com/search.naver?query=네노마정 효과" target="_blank">네노마정 효과</a></li><li><a href="https://search.naver.com/search.naver?query=네노마정 구매" target="_blank">네노마정 구매</a></li><li><a href="https://search.naver.com/search.naver?query=네노마정 처방" target="_blank">네노마정 처방</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>팔팔정</strong>
+                    <a href="https://search.naver.com/search.naver?query=팔팔정" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=팔팔정 복용법" target="_blank">팔팔정 복용법</a></li><li><a href="https://search.naver.com/search.naver?query=팔팔정 가격" target="_blank">팔팔정 가격</a></li><li><a href="https://search.naver.com/search.naver?query=팔팔정 처방" target="_blank">팔팔정 처방</a></li><li><a href="https://search.naver.com/search.naver?query=팔팔정 지속시간" target="_blank">팔팔정 지속시간</a></li><li><a href="https://search.naver.com/search.naver?query=팔팔정 부작용" target="_blank">팔팔정 부작용</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>비아그라복용법</strong>
+                    <a href="https://search.naver.com/search.naver?query=비아그라복용법" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=비아그라 복용법" target="_blank">비아그라 복용법</a></li><li><a href="https://search.naver.com/search.naver?query=비아그라 복용법 30분" target="_blank">비아그라 복용법 30분</a></li><li><a href="https://search.naver.com/search.naver?query=비아그라 복용법 효능" target="_blank">비아그라 복용법 효능</a></li><li><a href="https://search.naver.com/search.naver?query=비아그라 복용법 술" target="_blank">비아그라 복용법 술</a></li><li><a href="https://search.naver.com/search.naver?query=비아그라 복용법 100" target="_blank">비아그라 복용법 100</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>타오르정</strong>
+                    <a href="https://search.naver.com/search.naver?query=타오르정" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=타오르정 5mg" target="_blank">타오르정 5mg</a></li><li><a href="https://search.naver.com/search.naver?query=타오르정 가격" target="_blank">타오르정 가격</a></li><li><a href="https://search.naver.com/search.naver?query=타오르정 20mg" target="_blank">타오르정 20mg</a></li><li><a href="https://search.naver.com/search.naver?query=타오르정 10mg 가격" target="_blank">타오르정 10mg 가격</a></li><li><a href="https://search.naver.com/search.naver?query=타오르정 5mg 가격" target="_blank">타오르정 5mg 가격</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>야호맨</strong>
+                    <a href="https://search.naver.com/search.naver?query=야호맨" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=야호맨골드가격" target="_blank">야호맨골드가격</a></li><li><a href="https://search.naver.com/search.naver?query=야호맨골드" target="_blank">야호맨골드</a></li><li><a href="https://search.naver.com/search.naver?query=야호맨골드효능" target="_blank">야호맨골드효능</a></li><li><a href="https://search.naver.com/search.naver?query=야호맨가격" target="_blank">야호맨가격</a></li><li><a href="https://search.naver.com/search.naver?query=야호맨 효과" target="_blank">야호맨 효과</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>팔팔정가격</strong>
+                    <a href="https://search.naver.com/search.naver?query=팔팔정가격" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=팔팔정 가격" target="_blank">팔팔정 가격</a></li><li><a href="https://search.naver.com/search.naver?query=팔팔정 가격 싼곳" target="_blank">팔팔정 가격 싼곳</a></li><li><a href="https://search.naver.com/search.naver?query=팔팔정 가격 종로" target="_blank">팔팔정 가격 종로</a></li><li><a href="https://search.naver.com/search.naver?query=팔팔정 가격 구입" target="_blank">팔팔정 가격 구입</a></li><li><a href="https://search.naver.com/search.naver?query=팔팔정 가격 효능" target="_blank">팔팔정 가격 효능</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>고환피지낭종</strong>
+                    <a href="https://search.naver.com/search.naver?query=고환피지낭종" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=고환 피지낭종" target="_blank">고환 피지낭종</a></li><li><a href="https://search.naver.com/search.naver?query=고환 피지낭종 원인" target="_blank">고환 피지낭종 원인</a></li><li><a href="https://search.naver.com/search.naver?query=고환 피지낭종 연고" target="_blank">고환 피지낭종 연고</a></li><li><a href="https://search.naver.com/search.naver?query=고환 피지낭종 제거 비용" target="_blank">고환 피지낭종 제거 비용</a></li><li><a href="https://search.naver.com/search.naver?query=고환 피지낭종 병원" target="_blank">고환 피지낭종 병원</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>씨알리스가격</strong>
+                    <a href="https://search.naver.com/search.naver?query=씨알리스가격" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=씨알리스 가격" target="_blank">씨알리스 가격</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>시알리스가격</strong>
+                    <a href="https://search.naver.com/search.naver?query=시알리스가격" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=시알리스 가격" target="_blank">시알리스 가격</a></li><li><a href="https://search.naver.com/search.naver?query=시알리스 가격 약국" target="_blank">시알리스 가격 약국</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>질윤활재</strong>
+                    <a href="https://search.naver.com/search.naver?query=질윤활재" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=질윤활재 질염" target="_blank">질윤활재 질염</a></li><li><a href="https://search.naver.com/search.naver?query=질윤활재 가격" target="_blank">질윤활재 가격</a></li><li><a href="https://search.naver.com/search.naver?query=질윤활재 올리브영" target="_blank">질윤활재 올리브영</a></li><li><a href="https://search.naver.com/search.naver?query=질윤활재 올리브오일" target="_blank">질윤활재 올리브오일</a></li><li><a href="https://search.naver.com/search.naver?query=질윤활재 부작용" target="_blank">질윤활재 부작용</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>씨알리스</strong>
+                    <a href="https://search.naver.com/search.naver?query=씨알리스" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=씨알리스 효과" target="_blank">씨알리스 효과</a></li><li><a href="https://search.naver.com/search.naver?query=씨알리스 복용법" target="_blank">씨알리스 복용법</a></li><li><a href="https://search.naver.com/search.naver?query=씨알리스 가격" target="_blank">씨알리스 가격</a></li><li><a href="https://search.naver.com/search.naver?query=씨알리스 부작용" target="_blank">씨알리스 부작용</a></li><li><a href="https://search.naver.com/search.naver?query=씨알리스 5mg" target="_blank">씨알리스 5mg</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>구구정복용법</strong>
+                    <a href="https://search.naver.com/search.naver?query=구구정복용법" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=구구정 복용법" target="_blank">구구정 복용법</a></li><li><a href="https://search.naver.com/search.naver?query=구구정 복용법 부작용" target="_blank">구구정 복용법 부작용</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>시알리스</strong>
+                    <a href="https://search.naver.com/search.naver?query=시알리스" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=시알리스 효과" target="_blank">시알리스 효과</a></li><li><a href="https://search.naver.com/search.naver?query=시알리스 복용법" target="_blank">시알리스 복용법</a></li><li><a href="https://search.naver.com/search.naver?query=시알리스 가격" target="_blank">시알리스 가격</a></li><li><a href="https://search.naver.com/search.naver?query=시알리스 5mg" target="_blank">시알리스 5mg</a></li><li><a href="https://search.naver.com/search.naver?query=시알리스정" target="_blank">시알리스정</a></li>
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+    
+            </section>
+        </main>
+    </div>
+
+    <!-- 아카이브 버튼 -->
+    <div style="text-align: center; margin: 2rem 0;">
+        <a href="archive.html" class="archive-btn">📚 과거 분석 결과 보기</a>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="site-footer">
+        <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.querySelector('.keyword-table');
+            if (!table) return;
+
+            const headers = table.querySelectorAll('th');
+            const tbody = table.querySelector('tbody');
+
+            headers.forEach((header, index) => {
+                if (index === headers.length - 1) return;
+
+                header.addEventListener('click', function () {
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const isAsc = header.classList.contains('asc');
+
+                    headers.forEach(h => h.classList.remove('asc', 'desc'));
+                    header.classList.add(isAsc ? 'desc' : 'asc');
+
+                    rows.sort((a, b) => {
+                        let aVal = a.cells[index].textContent.trim();
+                        let bVal = b.cells[index].textContent.trim();
+
+                        const aNum = parseFloat(aVal.replace(/,/g, ''));
+                        const bNum = parseFloat(bVal.replace(/,/g, ''));
+
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return isAsc ? bNum - aNum : aNum - bNum;
+                        }
+
+                        return isAsc
+                            ? bVal.localeCompare(aVal, 'ko')
+                            : aVal.localeCompare(bVal, 'ko');
+                    });
+
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
