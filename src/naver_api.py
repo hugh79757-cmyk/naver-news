@@ -82,7 +82,7 @@ class NaverAPI:
                 else:
                     print(f"    ⚠️ [NaverAPI] 일부 키워드 조회 실패: {response.status_code}")
                     print(f"    ⚠️ [NaverAPI] 에러 내용: {response.text}")
-            except Exception as e:
+                except Exception as e:
                 print(f"    ⚠️ [NaverAPI] 요청 실패: {e}")
             
             time.sleep(0.2)
