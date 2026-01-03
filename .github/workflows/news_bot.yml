@@ -37,7 +37,20 @@ jobs:
         NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
         NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
       run: |
+          - name: 뉴스 봇 실행
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        NAVER_AD_CLIENT_ID: ${{ secrets.NAVER_AD_CLIENT_ID }}
+        NAVER_AD_CLIENT_SECRET: ${{ secrets.NAVER_AD_CLIENT_SECRET }}
+        NAVER_AD_CUSTOMER_ID: ${{ secrets.NAVER_AD_CUSTOMER_ID }}
+        NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+        NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+      run: |
+        python -c "import os; print('AD_CLIENT_ID:', bool(os.environ.get('NAVER_AD_CLIENT_ID'))); print('AD_SECRET:', bool(os.environ.get('NAVER_AD_CLIENT_SECRET'))); print('CUSTOMER_ID:', bool(os.environ.get('NAVER_AD_CUSTOMER_ID')))"
         python main.py
+  
+      python main.py
 
     - name: 결과 저장 및 배포
       run: |
