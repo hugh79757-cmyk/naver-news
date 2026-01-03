@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그 키워드 인사이트</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- 🔴 Google AdSense 자동광고 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
+        crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --dancheong-blue: #1e3a8a;
+            --dancheong-red: #dc2626;
+            --dancheong-gold: #f59e0b;
+            --dancheong-green: #166534;
+            --dancheong-white: #fefefe;
+            --dancheong-light: #f0f4ff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, var(--dancheong-light) 0%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* ===== 헤더 - 단청 패턴 ===== */
+        .site-header {
+            background: linear-gradient(135deg, var(--dancheong-blue) 0%, #1e40af 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(90deg,
+                    var(--dancheong-red) 0px,
+                    var(--dancheong-red) 20px,
+                    var(--dancheong-gold) 20px,
+                    var(--dancheong-gold) 40px,
+                    var(--dancheong-blue) 40px,
+                    var(--dancheong-blue) 60px,
+                    var(--dancheong-green) 60px,
+                    var(--dancheong-green) 80px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .header-content h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-content p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .header-content small {
+            display: inline-block;
+            margin-top: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* ===== 메인 레이아웃 (2열 구조) ===== */
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        /* ===== 사이드바 (광고 영역) ===== */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .ad-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-color);
+        }
+
+        .ad-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .ad-sticky {
+            position: sticky;
+            top: 1rem;
+        }
+
+        /* ===== 키워드 테이블 ===== */
+        .keyword-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .keyword-table th,
+        .keyword-table td {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .keyword-table th {
+            background-color: var(--dancheong-blue);
+            color: white;
+            font-weight: bold;
+        }
+
+        .keyword-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .keyword-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .keyword-table td:nth-child(2) {
+            text-align: left;
+        }
+
+        .update-info {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== 분석 버튼 ===== */
+        .analyze-btn {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #03c75a;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .analyze-btn:hover {
+            background: #02a94e;
+        }
+
+        /* ===== 연관검색어 그리드 ===== */
+        .related-keywords {
+            margin-top: 2rem;
+        }
+
+        .related-keywords h3 {
+            color: var(--dancheong-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .related-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e9ecef;
+        }
+
+        .related-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .related-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .related-list li {
+            padding: 4px 0;
+        }
+
+        .related-list li a {
+            color: #495057;
+            text-decoration: none;
+        }
+
+        .related-list li a:hover {
+            color: #03c75a;
+        }
+
+        .related-list .no-data {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* ===== 인피드 광고 ===== */
+        .infeed-ad {
+            background: #f9fafb;
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        /* ===== 아카이브 섹션 ===== */
+        .archive-section {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2rem;
+            border: 2px solid var(--dancheong-gold);
+        }
+
+        .archive-section h3 {
+            color: #92400e;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .archive-info {
+            color: #92400e;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .archive-list {
+            list-style: none;
+        }
+
+        .archive-list li {
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border: 1px solid #fde68a;
+            transition: all 0.2s;
+        }
+
+        .archive-list li:hover {
+            border-color: var(--dancheong-blue);
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+        }
+
+        .archive-list a {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .archive-date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .archive-keywords {
+            font-size: 0.85rem;
+            color: var(--dancheong-blue);
+        }
+
+        /* ===== 푸터 ===== */
+        .site-footer {
+            background: var(--dancheong-blue);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .site-footer p {
+            opacity: 0.8;
+            font-size: 0.85rem;
+        }
+
+        /* ===== 구분선 ===== */
+        hr {
+            margin: 2rem 0;
+            border: none;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        /* ===== 반응형 ===== */
+        @media (max-width: 968px) {
+            .main-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .ad-container {
+                flex: 1;
+                min-width: 280px;
+            }
+
+            .ad-sticky {
+                position: relative;
+                top: 0;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-content h1 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .keyword-table {
+                font-size: 12px;
+            }
+
+            .keyword-table th,
+            .keyword-table td {
+                padding: 8px 4px;
+            }
+
+        }
+
+        /* ===== 테이블 정렬 ===== */
+        .keyword-table th {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .keyword-table th:hover {
+            background-color: #1e40af;
+        }
+
+        .keyword-table th::after {
+            content: ' ⇅';
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        .keyword-table th.asc::after {
+            content: ' ▲';
+            opacity: 1;
+        }
+
+        .keyword-table th.desc::after {
+            content: ' ▼';
+            opacity: 1;
+        }
+
+        /* ===== 아카이브 버튼 ===== */
+        .archive-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--dancheong-gold) 0%, #f59e0b 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .archive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 헤더 -->
+    <header class="site-header">
+        <div class="header-content">
+            <h1>🎯 블로그 키워드 인사이트</h1>
+            <p>오늘의 뉴스를 분석한 <strong>SEO 최적화 키워드</strong></p>
+            <small>📅 업데이트: 2026년 01월 03일 16시 13분</small>
+        </div>
+    </header>
+
+    <!-- 메인 레이아웃 -->
+    <div class="main-wrapper">
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <section>
+                
+    <div class="keyword-report">
+        <h3>📊 상위노출 가능 키워드 TOP 50</h3>
+        <p class="update-info">포화도 = 블로그문서수 ÷ 월간검색량 (낮을수록 상위노출 쉬움)</p>
+        
+        <table class="keyword-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>키워드</th>
+                    <th>월간검색량</th>
+                    <th>블로그문서수</th>
+                    <th>포화도</th>
+                    <th>상위노출</th>
+                    <th>분석</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                <tr>
+                    <td>1</td>
+                    <td><strong>비만도계산기</strong></td>
+                    <td>110,040</td>
+                    <td>4,032</td>
+                    <td>0.04</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=비만도계산기" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>2</td>
+                    <td><strong>일본여행자보험추천</strong></td>
+                    <td>2,900</td>
+                    <td>803</td>
+                    <td>0.28</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=일본여행자보험추천" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>3</td>
+                    <td><strong>여행자보험비교</strong></td>
+                    <td>28,460</td>
+                    <td>10,498</td>
+                    <td>0.37</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=여행자보험비교" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>4</td>
+                    <td><strong>텔루라이드</strong></td>
+                    <td>39,250</td>
+                    <td>16,963</td>
+                    <td>0.43</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=텔루라이드" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>5</td>
+                    <td><strong>케이팝데몬헌터즈</strong></td>
+                    <td>8,180</td>
+                    <td>3,605</td>
+                    <td>0.44</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=케이팝데몬헌터즈" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>6</td>
+                    <td><strong>베트남이심</strong></td>
+                    <td>37,250</td>
+                    <td>20,348</td>
+                    <td>0.55</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=베트남이심" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>7</td>
+                    <td><strong>여행자보험추천</strong></td>
+                    <td>15,390</td>
+                    <td>8,767</td>
+                    <td>0.57</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=여행자보험추천" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>8</td>
+                    <td><strong>E심베트남</strong></td>
+                    <td>4,420</td>
+                    <td>2,757</td>
+                    <td>0.62</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=E심베트남" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>9</td>
+                    <td><strong>푸꾸옥이심</strong></td>
+                    <td>5,750</td>
+                    <td>3,775</td>
+                    <td>0.66</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=푸꾸옥이심" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>10</td>
+                    <td><strong>베트남E심</strong></td>
+                    <td>4,220</td>
+                    <td>2,810</td>
+                    <td>0.67</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=베트남E심" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>11</td>
+                    <td><strong>나트랑이심</strong></td>
+                    <td>9,820</td>
+                    <td>7,798</td>
+                    <td>0.79</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=나트랑이심" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>12</td>
+                    <td><strong>다낭이심</strong></td>
+                    <td>9,410</td>
+                    <td>7,854</td>
+                    <td>0.83</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=다낭이심" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>13</td>
+                    <td><strong>기아K4</strong></td>
+                    <td>4,970</td>
+                    <td>4,277</td>
+                    <td>0.86</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=기아K4" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>14</td>
+                    <td><strong>그랜저페이스리프트</strong></td>
+                    <td>32,130</td>
+                    <td>37,585</td>
+                    <td>1.17</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=그랜저페이스리프트" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>15</td>
+                    <td><strong>대한항공마일리지</strong></td>
+                    <td>124,900</td>
+                    <td>154,229</td>
+                    <td>1.23</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=대한항공마일리지" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>16</td>
+                    <td><strong>중국여행준비물</strong></td>
+                    <td>8,870</td>
+                    <td>12,394</td>
+                    <td>1.4</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=중국여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>17</td>
+                    <td><strong>일본여행준비물</strong></td>
+                    <td>38,850</td>
+                    <td>56,408</td>
+                    <td>1.45</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=일본여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>18</td>
+                    <td><strong>베트남ESIM</strong></td>
+                    <td>9,840</td>
+                    <td>15,897</td>
+                    <td>1.62</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=베트남ESIM" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>19</td>
+                    <td><strong>하나카드트래블로그</strong></td>
+                    <td>4,830</td>
+                    <td>7,972</td>
+                    <td>1.65</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=하나카드트래블로그" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>20</td>
+                    <td><strong>단기여행자보험</strong></td>
+                    <td>12,210</td>
+                    <td>23,236</td>
+                    <td>1.9</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=단기여행자보험" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>21</td>
+                    <td><strong>이심베트남</strong></td>
+                    <td>10,150</td>
+                    <td>20,175</td>
+                    <td>1.99</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=이심베트남" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>22</td>
+                    <td><strong>여행자보험</strong></td>
+                    <td>234,100</td>
+                    <td>493,815</td>
+                    <td>2.11</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=여행자보험" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>23</td>
+                    <td><strong>해외여행자보험</strong></td>
+                    <td>23,320</td>
+                    <td>50,791</td>
+                    <td>2.18</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=해외여행자보험" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>24</td>
+                    <td><strong>윗배빼는법</strong></td>
+                    <td>1,550</td>
+                    <td>3,877</td>
+                    <td>2.5</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=윗배빼는법" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>25</td>
+                    <td><strong>푸꾸옥여행준비물</strong></td>
+                    <td>3,380</td>
+                    <td>8,712</td>
+                    <td>2.58</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=푸꾸옥여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>26</td>
+                    <td><strong>다낭ESIM</strong></td>
+                    <td>2,370</td>
+                    <td>6,381</td>
+                    <td>2.69</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=다낭ESIM" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>27</td>
+                    <td><strong>강남다이어트병원</strong></td>
+                    <td>1,580</td>
+                    <td>4,350</td>
+                    <td>2.75</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=강남다이어트병원" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>28</td>
+                    <td><strong>미국여행준비물</strong></td>
+                    <td>4,660</td>
+                    <td>13,463</td>
+                    <td>2.89</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=미국여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>29</td>
+                    <td><strong>태국여행준비물</strong></td>
+                    <td>4,840</td>
+                    <td>14,034</td>
+                    <td>2.9</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=태국여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>30</td>
+                    <td><strong>나트랑ESIM</strong></td>
+                    <td>1,940</td>
+                    <td>5,678</td>
+                    <td>2.93</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=나트랑ESIM" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>31</td>
+                    <td><strong>홍콩여행준비물</strong></td>
+                    <td>7,510</td>
+                    <td>22,193</td>
+                    <td>2.96</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=홍콩여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>32</td>
+                    <td><strong>호주여행준비물</strong></td>
+                    <td>2,770</td>
+                    <td>8,242</td>
+                    <td>2.98</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=호주여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>33</td>
+                    <td><strong>여행용샤워필터</strong></td>
+                    <td>5,430</td>
+                    <td>16,291</td>
+                    <td>3.0</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=여행용샤워필터" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>34</td>
+                    <td><strong>트래블로그</strong></td>
+                    <td>28,760</td>
+                    <td>88,533</td>
+                    <td>3.08</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=트래블로그" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>35</td>
+                    <td><strong>볼살빼는법</strong></td>
+                    <td>3,460</td>
+                    <td>11,011</td>
+                    <td>3.18</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=볼살빼는법" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>36</td>
+                    <td><strong>대한항공마일리지카드</strong></td>
+                    <td>20,120</td>
+                    <td>64,833</td>
+                    <td>3.22</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=대한항공마일리지카드" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>37</td>
+                    <td><strong>푸꾸옥유심</strong></td>
+                    <td>3,360</td>
+                    <td>11,096</td>
+                    <td>3.3</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=푸꾸옥유심" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>38</td>
+                    <td><strong>세부여행준비물</strong></td>
+                    <td>3,510</td>
+                    <td>11,764</td>
+                    <td>3.35</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=세부여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>39</td>
+                    <td><strong>대만여행준비물</strong></td>
+                    <td>7,860</td>
+                    <td>28,355</td>
+                    <td>3.61</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=대만여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>40</td>
+                    <td><strong>ESIM베트남</strong></td>
+                    <td>4,320</td>
+                    <td>15,843</td>
+                    <td>3.67</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=ESIM베트남" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>41</td>
+                    <td><strong>이탈리아여행준비물</strong></td>
+                    <td>1,520</td>
+                    <td>5,780</td>
+                    <td>3.8</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=이탈리아여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>42</td>
+                    <td><strong>나트랑여행준비물</strong></td>
+                    <td>5,380</td>
+                    <td>20,493</td>
+                    <td>3.81</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=나트랑여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>43</td>
+                    <td><strong>하와이여행준비물</strong></td>
+                    <td>2,150</td>
+                    <td>8,277</td>
+                    <td>3.85</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=하와이여행준비물" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>44</td>
+                    <td><strong>똥배빼는법</strong></td>
+                    <td>1,570</td>
+                    <td>6,191</td>
+                    <td>3.94</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=똥배빼는법" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>45</td>
+                    <td><strong>나트랑유심</strong></td>
+                    <td>5,800</td>
+                    <td>23,194</td>
+                    <td>4.0</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=나트랑유심" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>46</td>
+                    <td><strong>워킹패드</strong></td>
+                    <td>11,920</td>
+                    <td>48,081</td>
+                    <td>4.03</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=워킹패드" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>47</td>
+                    <td><strong>내장지방빼는법</strong></td>
+                    <td>11,490</td>
+                    <td>47,486</td>
+                    <td>4.13</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=내장지방빼는법" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>48</td>
+                    <td><strong>모델3</strong></td>
+                    <td>45,670</td>
+                    <td>193,442</td>
+                    <td>4.24</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=모델3" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>49</td>
+                    <td><strong>베트남이심추천</strong></td>
+                    <td>2,980</td>
+                    <td>12,814</td>
+                    <td>4.3</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=베트남이심추천" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>50</td>
+                    <td><strong>트래블카드</strong></td>
+                    <td>56,490</td>
+                    <td>249,335</td>
+                    <td>4.41</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=트래블카드" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="related-keywords">
+        <h3>🔗 상위 20개 키워드 연관검색어</h3>
+        <p class="update-info">네이버 자동완성 기반 연관검색어입니다.</p>
+        
+        <div class="related-grid">
+    
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>비만도계산기</strong>
+                    <a href="https://search.naver.com/search.naver?query=비만도계산기" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=비만도 계산기" target="_blank">비만도 계산기</a></li><li><a href="https://search.naver.com/search.naver?query=네이버 비만도 계산기" target="_blank">네이버 비만도 계산기</a></li><li><a href="https://search.naver.com/search.naver?query=어린이 비만도 계산기" target="_blank">어린이 비만도 계산기</a></li><li><a href="https://search.naver.com/search.naver?query=여자 비만도 계산기" target="_blank">여자 비만도 계산기</a></li><li><a href="https://search.naver.com/search.naver?query=비만도 계산기 bmi" target="_blank">비만도 계산기 bmi</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>일본여행자보험추천</strong>
+                    <a href="https://search.naver.com/search.naver?query=일본여행자보험추천" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=일본 여행자보험 추천" target="_blank">일본 여행자보험 추천</a></li><li><a href="https://search.naver.com/search.naver?query=일본 여행자보험 추천 지진" target="_blank">일본 여행자보험 추천 지진</a></li><li><a href="https://search.naver.com/search.naver?query=일본 여행자보험 추천 비교" target="_blank">일본 여행자보험 추천 비교</a></li><li><a href="https://search.naver.com/search.naver?query=일본 여행자 보험 추천 카카오" target="_blank">일본 여행자 보험 추천 카카오</a></li><li><a href="https://search.naver.com/search.naver?query=일본 여행자보험 추천 가격비교" target="_blank">일본 여행자보험 추천 가격비교</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>여행자보험비교</strong>
+                    <a href="https://search.naver.com/search.naver?query=여행자보험비교" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=해외여행자보험비교" target="_blank">해외여행자보험비교</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>텔루라이드</strong>
+                    <a href="https://search.naver.com/search.naver?query=텔루라이드" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=텔루라이드 국내출시" target="_blank">텔루라이드 국내출시</a></li><li><a href="https://search.naver.com/search.naver?query=텔루라이드 가격" target="_blank">텔루라이드 가격</a></li><li><a href="https://search.naver.com/search.naver?query=텔루라이드 국내" target="_blank">텔루라이드 국내</a></li><li><a href="https://search.naver.com/search.naver?query=텔루라이드 하이브리드" target="_blank">텔루라이드 하이브리드</a></li><li><a href="https://search.naver.com/search.naver?query=텔루라이드 역수입" target="_blank">텔루라이드 역수입</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>케이팝데몬헌터즈</strong>
+                    <a href="https://search.naver.com/search.naver?query=케이팝데몬헌터즈" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=케이팝데몬헌터즈 팝업" target="_blank">케이팝데몬헌터즈 팝업</a></li><li><a href="https://search.naver.com/search.naver?query=케이팝데몬헌터즈 굿즈" target="_blank">케이팝데몬헌터즈 굿즈</a></li><li><a href="https://search.naver.com/search.naver?query=케이팝데몬헌터즈 노래" target="_blank">케이팝데몬헌터즈 노래</a></li><li><a href="https://search.naver.com/search.naver?query=케이팝데몬헌터즈 옷" target="_blank">케이팝데몬헌터즈 옷</a></li><li><a href="https://search.naver.com/search.naver?query=케이팝데몬헌터즈 팝업 예약" target="_blank">케이팝데몬헌터즈 팝업 예약</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>베트남이심</strong>
+                    <a href="https://search.naver.com/search.naver?query=베트남이심" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=베트남 이심" target="_blank">베트남 이심</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 이심 추천" target="_blank">베트남 이심 추천</a></li><li><a href="https://search.naver.com/search.naver?query=말톡 베트남 이심" target="_blank">말톡 베트남 이심</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 이심 구매" target="_blank">베트남 이심 구매</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 이심 사용법" target="_blank">베트남 이심 사용법</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>여행자보험추천</strong>
+                    <a href="https://search.naver.com/search.naver?query=여행자보험추천" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=여행자보험 추천" target="_blank">여행자보험 추천</a></li><li><a href="https://search.naver.com/search.naver?query=일본 여행자보험 추천" target="_blank">일본 여행자보험 추천</a></li><li><a href="https://search.naver.com/search.naver?query=여행자보험 추천 일본" target="_blank">여행자보험 추천 일본</a></li><li><a href="https://search.naver.com/search.naver?query=대만 여행자보험 추천" target="_blank">대만 여행자보험 추천</a></li><li><a href="https://search.naver.com/search.naver?query=해외여행자보험 추천" target="_blank">해외여행자보험 추천</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>E심베트남</strong>
+                    <a href="https://search.naver.com/search.naver?query=E심베트남" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=e심 베트남" target="_blank">e심 베트남</a></li><li><a href="https://search.naver.com/search.naver?query=e심 베트남 사용방법" target="_blank">e심 베트남 사용방법</a></li><li><a href="https://search.naver.com/search.naver?query=e심 베트남 나트랑" target="_blank">e심 베트남 나트랑</a></li><li><a href="https://search.naver.com/search.naver?query=e심 베트남 하노이" target="_blank">e심 베트남 하노이</a></li><li><a href="https://search.naver.com/search.naver?query=e심 베트남 전화" target="_blank">e심 베트남 전화</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>푸꾸옥이심</strong>
+                    <a href="https://search.naver.com/search.naver?query=푸꾸옥이심" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=푸꾸옥 이심" target="_blank">푸꾸옥 이심</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 푸꾸옥 이심" target="_blank">베트남 푸꾸옥 이심</a></li><li><a href="https://search.naver.com/search.naver?query=말톡 푸꾸옥 이심" target="_blank">말톡 푸꾸옥 이심</a></li><li><a href="https://search.naver.com/search.naver?query=푸꾸옥 이심 말톡" target="_blank">푸꾸옥 이심 말톡</a></li><li><a href="https://search.naver.com/search.naver?query=푸꾸옥 이심 구매" target="_blank">푸꾸옥 이심 구매</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>베트남E심</strong>
+                    <a href="https://search.naver.com/search.naver?query=베트남E심" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=베트남e심 설치방법" target="_blank">베트남e심 설치방법</a></li><li><a href="https://search.naver.com/search.naver?query=베트남e심 종류" target="_blank">베트남e심 종류</a></li><li><a href="https://search.naver.com/search.naver?query=베트남e심과유심차이" target="_blank">베트남e심과유심차이</a></li><li><a href="https://search.naver.com/search.naver?query=베트남e심 취소방법" target="_blank">베트남e심 취소방법</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 e심" target="_blank">베트남 e심</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>나트랑이심</strong>
+                    <a href="https://search.naver.com/search.naver?query=나트랑이심" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=나트랑 이심" target="_blank">나트랑 이심</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 나트랑 이심" target="_blank">베트남 나트랑 이심</a></li><li><a href="https://search.naver.com/search.naver?query=나트랑 이심 말톡" target="_blank">나트랑 이심 말톡</a></li><li><a href="https://search.naver.com/search.naver?query=말톡 나트랑 이심" target="_blank">말톡 나트랑 이심</a></li><li><a href="https://search.naver.com/search.naver?query=나트랑 이심 구매" target="_blank">나트랑 이심 구매</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>다낭이심</strong>
+                    <a href="https://search.naver.com/search.naver?query=다낭이심" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=다낭 이심" target="_blank">다낭 이심</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 다낭 이심" target="_blank">베트남 다낭 이심</a></li><li><a href="https://search.naver.com/search.naver?query=다낭 이심 구매" target="_blank">다낭 이심 구매</a></li><li><a href="https://search.naver.com/search.naver?query=다낭 이심 사용법" target="_blank">다낭 이심 사용법</a></li><li><a href="https://search.naver.com/search.naver?query=다낭 이심 5일" target="_blank">다낭 이심 5일</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>기아K4</strong>
+                    <a href="https://search.naver.com/search.naver?query=기아K4" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=기아 k4" target="_blank">기아 k4</a></li><li><a href="https://search.naver.com/search.naver?query=기아 k4 국내 출시" target="_blank">기아 k4 국내 출시</a></li><li><a href="https://search.naver.com/search.naver?query=기아 k4 가격" target="_blank">기아 k4 가격</a></li><li><a href="https://search.naver.com/search.naver?query=기아 k4 해치백" target="_blank">기아 k4 해치백</a></li><li><a href="https://search.naver.com/search.naver?query=기아 k4 하이브리드" target="_blank">기아 k4 하이브리드</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>그랜저페이스리프트</strong>
+                    <a href="https://search.naver.com/search.naver?query=그랜저페이스리프트" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=그랜저 페이스리프트" target="_blank">그랜저 페이스리프트</a></li><li><a href="https://search.naver.com/search.naver?query=그랜저 페이스리프트 2026" target="_blank">그랜저 페이스리프트 2026</a></li><li><a href="https://search.naver.com/search.naver?query=그랜저 페이스리프트 출시일" target="_blank">그랜저 페이스리프트 출시일</a></li><li><a href="https://search.naver.com/search.naver?query=그랜저 페이스리프트 실내" target="_blank">그랜저 페이스리프트 실내</a></li><li><a href="https://search.naver.com/search.naver?query=2026 그랜저 페이스리프트" target="_blank">2026 그랜저 페이스리프트</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>대한항공마일리지</strong>
+                    <a href="https://search.naver.com/search.naver?query=대한항공마일리지" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=대한항공 마일리지몰" target="_blank">대한항공 마일리지몰</a></li><li><a href="https://search.naver.com/search.naver?query=대한항공 마일리지" target="_blank">대한항공 마일리지</a></li><li><a href="https://search.naver.com/search.naver?query=대한항공 마일리지 사용" target="_blank">대한항공 마일리지 사용</a></li><li><a href="https://search.naver.com/search.naver?query=대한항공 마일리지 가치" target="_blank">대한항공 마일리지 가치</a></li><li><a href="https://search.naver.com/search.naver?query=대한항공 마일리지 카드" target="_blank">대한항공 마일리지 카드</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>중국여행준비물</strong>
+                    <a href="https://search.naver.com/search.naver?query=중국여행준비물" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=중국여행 준비물" target="_blank">중국여행 준비물</a></li><li><a href="https://search.naver.com/search.naver?query=중국여행 준비물 리스트" target="_blank">중국여행 준비물 리스트</a></li><li><a href="https://search.naver.com/search.naver?query=중국 여행 준비물 체크리스트" target="_blank">중국 여행 준비물 체크리스트</a></li><li><a href="https://search.naver.com/search.naver?query=중국 여행 준비물 어플" target="_blank">중국 여행 준비물 어플</a></li><li><a href="https://search.naver.com/search.naver?query=중국여행 준비물 콘센트" target="_blank">중국여행 준비물 콘센트</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>일본여행준비물</strong>
+                    <a href="https://search.naver.com/search.naver?query=일본여행준비물" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=일본여행준비물품" target="_blank">일본여행준비물품</a></li><li><a href="https://search.naver.com/search.naver?query=일본여행 준비물" target="_blank">일본여행 준비물</a></li><li><a href="https://search.naver.com/search.naver?query=일본여행 준비물 리스트" target="_blank">일본여행 준비물 리스트</a></li><li><a href="https://search.naver.com/search.naver?query=일본여행 준비물 체크리스트" target="_blank">일본여행 준비물 체크리스트</a></li><li><a href="https://search.naver.com/search.naver?query=겨울 일본여행 준비물" target="_blank">겨울 일본여행 준비물</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>베트남ESIM</strong>
+                    <a href="https://search.naver.com/search.naver?query=베트남ESIM" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=베트남esim 당일" target="_blank">베트남esim 당일</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 esim 추천" target="_blank">베트남 esim 추천</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 esim 무제한" target="_blank">베트남 esim 무제한</a></li><li><a href="https://search.naver.com/search.naver?query=베트남 esim 말톡" target="_blank">베트남 esim 말톡</a></li><li><a href="https://search.naver.com/search.naver?query=말톡 베트남 esim" target="_blank">말톡 베트남 esim</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>하나카드트래블로그</strong>
+                    <a href="https://search.naver.com/search.naver?query=하나카드트래블로그" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=하나카드 트래블로그" target="_blank">하나카드 트래블로그</a></li><li><a href="https://search.naver.com/search.naver?query=하나카드 트래블로그 체크카드" target="_blank">하나카드 트래블로그 체크카드</a></li><li><a href="https://search.naver.com/search.naver?query=하나카드 트래블로그 일본" target="_blank">하나카드 트래블로그 일본</a></li><li><a href="https://search.naver.com/search.naver?query=하나카드 트래블로그 유니온페이" target="_blank">하나카드 트래블로그 유니온페이</a></li><li><a href="https://search.naver.com/search.naver?query=하나카드 트래블로그 라운지" target="_blank">하나카드 트래블로그 라운지</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>단기여행자보험</strong>
+                    <a href="https://search.naver.com/search.naver?query=단기여행자보험" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=단기여행자보험가격비교" target="_blank">단기여행자보험가격비교</a></li><li><a href="https://search.naver.com/search.naver?query=국내단기여행자보험" target="_blank">국내단기여행자보험</a></li><li><a href="https://search.naver.com/search.naver?query=단기여행자보험추천" target="_blank">단기여행자보험추천</a></li>
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+    
+            </section>
+
+            <!-- 🔴 인피드 광고 (콘텐츠 중간) -->
+            <div class="infeed-ad">
+                <p class="ad-label">Advertisement</p>
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6677996696534146"
+                    data-ad-slot="2800647401" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+
+            <!-- 아카이브 섹션 -->
+            {{archive_list}}
+        </main>
+
+        <!-- 사이드바 (광고) -->
+        <aside class="sidebar">
+            <div class="ad-sticky">
+                <!-- 🔴 사이드레일 광고 1 -->
+                <div class="ad-container">
+                    <p class="ad-label">Sponsored</p>
+                    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6677996696534146"
+                        data-ad-slot="2800647401" data-ad-format="vertical" data-full-width-responsive="false"></ins>
+                    <script>
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+
+                <!-- 🔴 사이드레일 광고 2 -->
+                <div class="ad-container" style="margin-top: 1.5rem;">
+                    <p class="ad-label">Sponsored</p>
+                    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6677996696534146"
+                        data-ad-slot="2800647401" data-ad-format="rectangle"></ins>
+                    <script>
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <!-- 아카이브 버튼 -->
+    <div style="text-align: center; margin: 2rem 0;">
+        <a href="archive.html" class="archive-btn">📚 과거 분석 결과 보기</a>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="site-footer">
+        <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.querySelector('.keyword-table');
+            if (!table) return;
+
+            const headers = table.querySelectorAll('th');
+            const tbody = table.querySelector('tbody');
+
+            headers.forEach((header, index) => {
+                // 마지막 열(분석 버튼)은 제외
+                if (index === headers.length - 1) return;
+
+                header.addEventListener('click', function () {
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const isAsc = header.classList.contains('asc');
+
+                    // 모든 헤더 클래스 초기화
+                    headers.forEach(h => h.classList.remove('asc', 'desc'));
+
+                    // 정렬 방향 설정
+                    header.classList.add(isAsc ? 'desc' : 'asc');
+
+                    rows.sort((a, b) => {
+                        let aVal = a.cells[index].textContent.trim();
+                        let bVal = b.cells[index].textContent.trim();
+
+                        // 숫자 처리 (콤마 제거)
+                        const aNum = parseFloat(aVal.replace(/,/g, ''));
+                        const bNum = parseFloat(bVal.replace(/,/g, ''));
+
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return isAsc ? bNum - aNum : aNum - bNum;
+                        }
+
+                        // 문자열 처리
+                        return isAsc
+                            ? bVal.localeCompare(aVal, 'ko')
+                            : aVal.localeCompare(bVal, 'ko');
+                    });
+
+                    // 정렬된 행 다시 추가
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
