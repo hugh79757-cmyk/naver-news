@@ -120,7 +120,7 @@ class NaverAPI:
         search_volumes = self.get_search_volume(keywords)
         print(f"    ✅ {len(search_volumes)}개 키워드 검색량 조회 완료")
         
-        sorted_keywords = sorted(search_volumes.items(), key=lambda x: x[1], reverse=True)[:200]
+        sorted_keywords = sorted(search_volumes.items(), key=lambda x: x[1], reverse=True)[:100]
         
         print(f"    📝 블로그 문서수 조회 중... (상위 {len(sorted_keywords)}개)")
         results = []
