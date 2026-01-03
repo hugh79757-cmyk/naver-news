@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import shutil
 
 def build_keyword_report(keyword_results, related_data=None):
@@ -8,8 +8,8 @@ def build_keyword_report(keyword_results, related_data=None):
     if not keyword_results:
         return "<p>분석된 키워드가 없습니다.</p>"
     
-    # 포화도 1 이하만 선택
-    top_keywords = [r for r in keyword_results if r["saturation"] <= 1.0][:50]
+    # 포화도 1.5 이하만 선택
+    top_keywords = [r for r in keyword_results if r["saturation"] <= 1.5][:50]
     
     html = """
     <div class="keyword-report">
@@ -98,11 +98,10 @@ def build_html_file(ai_content, keyword_results=None):
     """HTML 파일 생성 및 아카이브"""
     print("    🔨 [Builder] HTML 생성 중...")
     
-    from datetime import timezone, timedelta
     kst = timezone(timedelta(hours=9))
     now = datetime.now(kst)
 
-    now_str = now.strftime("%Y년 %m월 %d일 %H시 %M분")
+    now_str = f"📅 업데이트: {now.strftime('%Y년 %m월 %d일 %H시 %M분')}"
     date_prefix = now.strftime("%Y-%m-%d_%H-%M")
     
     # 상위 3개 키워드 추출 (파일명용)
@@ -134,9 +133,9 @@ def build_html_file(ai_content, keyword_results=None):
         print(f"    ❌ 템플릿 파일 없음: {template_path}")
         return
 
-    # 플레이스홀더 치환
-    final_html = template.replace("{{date}}", now_str)
-    final_html = final_html.replace("{{content}}", ai_content)
+    # 플레이스홀더 치환 (템플릿에 맞게 수정)
+    final_html = template.replace("{{update_time}}", now_str)
+    final_html = final_html.replace("{{keyword_content}}", ai_content)
     
     # 저장
     with open(output_path, "w", encoding="utf-8") as f:

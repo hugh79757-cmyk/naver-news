@@ -1,57 +1,61 @@
-import os
 import anthropic
+import time
 
-def analyze_headlines(headlines):
-    """
-    뉴스 헤드라인에서 키워드 후보를 대량 추출합니다.
-    """
+def extract_keywords(headlines):
+    """Claude AI로 뉴스 헤드라인에서 블로그 키워드 추출"""
     print("🧠 [Analyzer] 키워드 추출 시작...")
     
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("❌ [Analyzer] API 키가 없습니다.")
-        return []
-
-    client = anthropic.Anthropic(api_key=api_key)
-    news_text = "\n".join(headlines)
+    client = anthropic.Anthropic()
     
-    prompt = f"""
-아래 뉴스 헤드라인들을 분석해서 블로그 키워드 후보를 추출하세요.
+    headlines_text = "\n".join([f"- {h}" for h in headlines])
+    
+    prompt = f"""다음 뉴스 헤드라인들을 분석하여 블로그 키워드를 추출해주세요.
 
-[뉴스 헤드라인]
-{news_text}
+뉴스 헤드라인:
+{headlines_text}
 
-[추출 규칙]
-1. 각 뉴스에서 사람들이 검색할 만한 키워드를 최대한 많이 추출
-2. 키워드 형태:
-   - 메인 키워드 (2~3단어): 예) "전기차 보조금", "삼성 갤럭시"
-   - 롱테일 키워드 (3~5단어): 예) "2025 전기차 보조금 신청방법"
-   - 질문형 키워드: 예) "전기차 보조금 얼마"
-   - 연관 키워드: 뉴스와 관련된 파생 키워드도 포함
-3. 반드시 50개 이상 키워드 추출 (목표: 60~80개)
-4. 너무 일반적인 키워드는 제외 (예: "뉴스", "오늘", "발표")
-5. 실제 사람들이 네이버에서 검색할 법한 자연스러운 키워드만
+요구사항:
+1. 각 헤드라인에서 블로그 검색에 적합한 키워드 2-3개 추출
+2. 띄어쓰기 없이 붙여서 작성 (예: "삼성전자주가", "비트코인전망")
+3. 너무 일반적인 단어 제외 (뉴스, 오늘, 발표 등)
+4. 검색량이 있을 것 같은 구체적인 키워드 선정
+5. 키워드만 쉼표로 구분하여 나열 (설명 없이)
 
-[출력 형식]
-키워드만 한 줄에 하나씩 출력하세요. 번호나 설명 없이 키워드만.
-반드시 50개 이상 출력하세요.
+응답 형식:
+키워드1, 키워드2, 키워드3, ...
 """
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=1024,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            result = response.content[0].text
+            keywords = [kw.strip().replace(" ", "") for kw in result.split(",")]
+            keywords = [kw for kw in keywords if len(kw) >= 2]
+            keywords = list(dict.fromkeys(keywords))
+            
+            print(f"✅ [Analyzer] {len(keywords)}개 키워드 추출 완료")
+            return keywords
+            
+        except anthropic.APIError as e:
+            if "overloaded" in str(e).lower() or "529" in str(e):
+                wait_time = (attempt + 1) * 30  # 30초, 60초, 90초
+                print(f"⏳ [Analyzer] API 과부하, {wait_time}초 후 재시도... ({attempt + 1}/{max_retries})")
+                time.sleep(wait_time)
+            else:
+                print(f"❌ [Analyzer] 에러: {e}")
+                return []
+    
+    print("❌ [Analyzer] 최대 재시도 횟수 초과")
+    return []
 
-    try:
-        message = client.messages.create(
-            model="claude-3-haiku-20240307",
-            max_tokens=3000,
-            temperature=0.7,
-            messages=[{"role": "user", "content": prompt}]
-        )
 
-        result = message.content[0].text
-        
-        keywords = [line.strip() for line in result.strip().split("\n") if line.strip()]
-        
-        print(f"✅ [Analyzer] {len(keywords)}개 키워드 추출 완료")
-        return keywords
-        
-    except Exception as e:
-        print(f"❌ [Analyzer] 에러: {e}")
-        return []
+# 함수 별칭 (main.py 호환성)
+analyze_headlines = extract_keywords
