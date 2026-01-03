@@ -108,6 +108,13 @@ def build_html_file(ai_content, keyword_results=None):
     now = datetime.now()
     now_str = now.strftime("%Y년 %m월 %d일 %H시 %M분")
     date_prefix = now.strftime("%Y-%m-%d_%H-%M")
+
+        # 아카이브 페이지 생성
+    archive_html = generate_archive_page(archive_dir)
+    archive_page_path = "output/archive.html"
+    with open(archive_page_path, "w", encoding="utf-8") as f:
+        f.write(archive_html)
+
     
     # 상위 3개 키워드 추출 (파일명용)
     if keyword_results and len(keyword_results) > 0:
@@ -199,5 +206,136 @@ def generate_archive_list(archive_dir):
         else:
             html += f'<li><a href="archive/{filename}" target="_blank">📄 {filename}</a></li>'
     
-    html += '</ul></div>'
+    def generate_archive_page(archive_dir):
+    """별도 아카이브 페이지 생성"""
+    files = sorted(
+        [f for f in os.listdir(archive_dir) if f.endswith('.html')],
+        reverse=True
+    )
+    
+    html = """<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과거 분석 결과 - 블로그 키워드 인사이트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dancheong-blue: #1e3a8a;
+            --dancheong-gold: #f59e0b;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(180deg, #f0f4ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--dancheong-blue) 0%, #1e40af 100%);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+        .header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--dancheong-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+        .back-btn:hover { background: #1e40af; }
+        .archive-list { list-style: none; }
+        .archive-list li {
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+        .archive-list li:hover {
+            border-color: var(--dancheong-blue);
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+        }
+        .archive-list a {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        .archive-date { color: var(--text-secondary); font-size: 0.9rem; }
+        .archive-keywords { color: var(--dancheong-blue); font-size: 0.9rem; }
+        .count-info {
+            background: #fffbeb;
+            border: 1px solid var(--dancheong-gold);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>📚 과거 분석 결과 아카이브</h1>
+        <p>이전에 분석된 키워드 리포트 목록</p>
+    </header>
+    <div class="container">
+        <a href="index.html" class="back-btn">← 메인으로 돌아가기</a>
+        <div class="count-info">
+            <strong>"""
+    
+    html += str(len(files))
+    html += """</strong>개의 분석 결과가 저장되어 있습니다.
+        </div>
+        <ul class="archive-list">
+"""
+    
+    for filename in files:
+        parts = filename.replace('.html', '').split('_')
+        
+        if len(parts) >= 2:
+            date_part = parts[0]
+            time_part = parts[1]
+            keywords_part = '_'.join(parts[2:]) if len(parts) > 2 else "분석결과"
+            
+            try:
+                date_obj = datetime.strptime(f"{date_part} {time_part}", "%Y-%m-%d %H-%M")
+                display_date = date_obj.strftime("%Y년 %m월 %d일 %H:%M")
+            except:
+                display_date = f"{date_part} {time_part}"
+            
+            keywords_display = keywords_part.replace('_', ' · ')
+            
+            html += f'''
+            <li>
+                <a href="archive/{filename}" target="_blank">
+                    <span class="archive-date">📅 {display_date}</span>
+                    <span class="archive-keywords">🔑 {keywords_display}</span>
+                </a>
+            </li>
+'''
+        else:
+            html += f'<li><a href="archive/{filename}" target="_blank">📄 {filename}</a></li>'
+    
+    html += """
+        </ul>
+    </div>
+</body>
+</html>"""
+    
     return html

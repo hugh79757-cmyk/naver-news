@@ -413,6 +413,25 @@
             content: ' ▼';
             opacity: 1;
         }
+
+        /* ===== 아카이브 버튼 ===== */
+        .archive-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--dancheong-gold) 0%, #f59e0b 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .archive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
     </style>
 </head>
 
@@ -473,57 +492,61 @@
             </div>
         </aside>
     </div>
+    <!-- 아카이브 버튼 -->
+    <div style="text-align: center; margin: 2rem 0;">
+        <a href="archive.html" class="archive-btn">📚 과거 분석 결과 보기</a>
+    </div>
 
     <!-- 푸터 -->
     <footer class="site-footer">
         <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
     </footer>
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const table = document.querySelector('.keyword-table');
-    if (!table) return;
-    
-    const headers = table.querySelectorAll('th');
-    const tbody = table.querySelector('tbody');
-    
-    headers.forEach((header, index) => {
-        // 마지막 열(분석 버튼)은 제외
-        if (index === headers.length - 1) return;
-        
-        header.addEventListener('click', function() {
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            const isAsc = header.classList.contains('asc');
-            
-            // 모든 헤더 클래스 초기화
-            headers.forEach(h => h.classList.remove('asc', 'desc'));
-            
-            // 정렬 방향 설정
-            header.classList.add(isAsc ? 'desc' : 'asc');
-            
-            rows.sort((a, b) => {
-                let aVal = a.cells[index].textContent.trim();
-                let bVal = b.cells[index].textContent.trim();
-                
-                // 숫자 처리 (콤마 제거)
-                const aNum = parseFloat(aVal.replace(/,/g, ''));
-                const bNum = parseFloat(bVal.replace(/,/g, ''));
-                
-                if (!isNaN(aNum) && !isNaN(bNum)) {
-                    return isAsc ? bNum - aNum : aNum - bNum;
-                }
-                
-                // 문자열 처리
-                return isAsc 
-                    ? bVal.localeCompare(aVal, 'ko') 
-                    : aVal.localeCompare(bVal, 'ko');
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.querySelector('.keyword-table');
+            if (!table) return;
+
+            const headers = table.querySelectorAll('th');
+            const tbody = table.querySelector('tbody');
+
+            headers.forEach((header, index) => {
+                // 마지막 열(분석 버튼)은 제외
+                if (index === headers.length - 1) return;
+
+                header.addEventListener('click', function () {
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const isAsc = header.classList.contains('asc');
+
+                    // 모든 헤더 클래스 초기화
+                    headers.forEach(h => h.classList.remove('asc', 'desc'));
+
+                    // 정렬 방향 설정
+                    header.classList.add(isAsc ? 'desc' : 'asc');
+
+                    rows.sort((a, b) => {
+                        let aVal = a.cells[index].textContent.trim();
+                        let bVal = b.cells[index].textContent.trim();
+
+                        // 숫자 처리 (콤마 제거)
+                        const aNum = parseFloat(aVal.replace(/,/g, ''));
+                        const bNum = parseFloat(bVal.replace(/,/g, ''));
+
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return isAsc ? bNum - aNum : aNum - bNum;
+                        }
+
+                        // 문자열 처리
+                        return isAsc
+                            ? bVal.localeCompare(aVal, 'ko')
+                            : aVal.localeCompare(bVal, 'ko');
+                    });
+
+                    // 정렬된 행 다시 추가
+                    rows.forEach(row => tbody.appendChild(row));
+                });
             });
-            
-            // 정렬된 행 다시 추가
-            rows.forEach(row => tbody.appendChild(row));
         });
-    });
-});
-</script>
+    </script>
 
 </body>
 
