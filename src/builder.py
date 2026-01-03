@@ -98,7 +98,10 @@ def build_html_file(ai_content, keyword_results=None):
     """HTML 파일 생성 및 아카이브"""
     print("    🔨 [Builder] HTML 생성 중...")
     
-    now = datetime.now()
+    from datetime import timezone, timedelta
+    kst = timezone(timedelta(hours=9))
+    now = datetime.now(kst)
+
     now_str = now.strftime("%Y년 %m월 %d일 %H시 %M분")
     date_prefix = now.strftime("%Y-%m-%d_%H-%M")
     
