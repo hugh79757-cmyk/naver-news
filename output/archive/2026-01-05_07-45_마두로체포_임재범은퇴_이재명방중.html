@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그 키워드 인사이트</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- 🔴 Google AdSense 자동광고 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
+        crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --dancheong-blue: #1e3a8a;
+            --dancheong-red: #dc2626;
+            --dancheong-gold: #f59e0b;
+            --dancheong-green: #166534;
+            --dancheong-white: #fefefe;
+            --dancheong-light: #f0f4ff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, var(--dancheong-light) 0%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* ===== 헤더 - 단청 패턴 ===== */
+        .site-header {
+            background: linear-gradient(135deg, var(--dancheong-blue) 0%, #1e40af 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(90deg,
+                    var(--dancheong-red) 0px,
+                    var(--dancheong-red) 20px,
+                    var(--dancheong-gold) 20px,
+                    var(--dancheong-gold) 40px,
+                    var(--dancheong-blue) 40px,
+                    var(--dancheong-blue) 60px,
+                    var(--dancheong-green) 60px,
+                    var(--dancheong-green) 80px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .header-content h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-content p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .header-content small {
+            display: inline-block;
+            margin-top: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* ===== 메인 레이아웃 (1열 - 사이드바 제거) ===== */
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        /* ===== 키워드 테이블 ===== */
+        .keyword-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .keyword-table th,
+        .keyword-table td {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .keyword-table th {
+            background-color: var(--dancheong-blue);
+            color: white;
+            font-weight: bold;
+        }
+
+        .keyword-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .keyword-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .keyword-table td:nth-child(2) {
+            text-align: left;
+        }
+
+        .update-info {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== 분석 버튼 ===== */
+        .analyze-btn {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #03c75a;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .analyze-btn:hover {
+            background: #02a94e;
+        }
+
+        /* ===== 연관검색어 그리드 ===== */
+        .related-keywords {
+            margin-top: 2rem;
+        }
+
+        .related-keywords h3 {
+            color: var(--dancheong-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .related-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e9ecef;
+        }
+
+        .related-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .related-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .related-list li {
+            padding: 4px 0;
+        }
+
+        .related-list li a {
+            color: #495057;
+            text-decoration: none;
+        }
+
+        .related-list li a:hover {
+            color: #03c75a;
+        }
+
+        .related-list .no-data {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* ===== 아카이브 버튼 ===== */
+        .archive-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--dancheong-gold) 0%, #f59e0b 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .archive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        /* ===== 푸터 ===== */
+        .site-footer {
+            background: var(--dancheong-blue);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .site-footer p {
+            opacity: 0.8;
+            font-size: 0.85rem;
+        }
+
+        /* ===== 테이블 정렬 ===== */
+        .keyword-table th {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .keyword-table th:hover {
+            background-color: #1e40af;
+        }
+
+        .keyword-table th::after {
+            content: ' ⇅';
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        .keyword-table th.asc::after {
+            content: ' ▲';
+            opacity: 1;
+        }
+
+        .keyword-table th.desc::after {
+            content: ' ▼';
+            opacity: 1;
+        }
+
+        /* ===== 반응형 ===== */
+        @media (max-width: 768px) {
+            .header-content h1 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .keyword-table {
+                font-size: 12px;
+            }
+
+            .keyword-table th,
+            .keyword-table td {
+                padding: 8px 4px;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 헤더 -->
+    <header class="site-header">
+        <div class="header-content">
+            <h1>🎯 블로그 키워드 인사이트</h1>
+            <p>오늘의 뉴스를 분석한 <strong>SEO 최적화 키워드</strong></p>
+            <small>📅 업데이트: 2026년 01월 04일 19시 45분</small>
+        </div>
+    </header>
+
+    <!-- 메인 레이아웃 -->
+    <div class="main-wrapper">
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <section>
+                
+    <div class="keyword-report">
+        <h3>📊 상위노출 가능 키워드 TOP 50</h3>
+        <p class="update-info">포화도 = 블로그문서수 ÷ 월간검색량 (낮을수록 상위노출 쉬움)</p>
+        
+        <table class="keyword-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>키워드</th>
+                    <th>월간검색량</th>
+                    <th>블로그문서수</th>
+                    <th>포화도</th>
+                    <th>상위노출</th>
+                    <th>분석</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                <tr>
+                    <td>1</td>
+                    <td><strong>이부진아들</strong></td>
+                    <td>48,680</td>
+                    <td>5,501</td>
+                    <td>0.11</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=이부진아들" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>2</td>
+                    <td><strong>이재명방중</strong></td>
+                    <td>12,020</td>
+                    <td>3,244</td>
+                    <td>0.27</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=이재명방중" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>3</td>
+                    <td><strong>김병기강선우</strong></td>
+                    <td>5,070</td>
+                    <td>1,880</td>
+                    <td>0.37</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=김병기강선우" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>4</td>
+                    <td><strong>BYD</strong></td>
+                    <td>178,000</td>
+                    <td>127,879</td>
+                    <td>0.72</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=BYD" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>5</td>
+                    <td><strong>BYD전기차</strong></td>
+                    <td>86,800</td>
+                    <td>86,583</td>
+                    <td>1.0</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=BYD전기차" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>6</td>
+                    <td><strong>혈당컷</strong></td>
+                    <td>2,270</td>
+                    <td>3,101</td>
+                    <td>1.37</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=혈당컷" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="related-keywords">
+        <h3>🔗 상위 20개 키워드 연관검색어</h3>
+        <p class="update-info">네이버 자동완성 기반 연관검색어입니다.</p>
+        
+        <div class="related-grid">
+    
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>이부진아들</strong>
+                    <a href="https://search.naver.com/search.naver?query=이부진아들" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li class="no-data">연관검색어 없음</li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>이재명방중</strong>
+                    <a href="https://search.naver.com/search.naver?query=이재명방중" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=이재명 방중" target="_blank">이재명 방중</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>김병기강선우</strong>
+                    <a href="https://search.naver.com/search.naver?query=김병기강선우" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=김병기 강선우" target="_blank">김병기 강선우</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>BYD</strong>
+                    <a href="https://search.naver.com/search.naver?query=BYD" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=byd" target="_blank">byd</a></li><li><a href="https://search.naver.com/search.naver?query=byd 전기차" target="_blank">byd 전기차</a></li><li><a href="https://search.naver.com/search.naver?query=byd 씨라이언7" target="_blank">byd 씨라이언7</a></li><li><a href="https://search.naver.com/search.naver?query=byd 아토3" target="_blank">byd 아토3</a></li><li><a href="https://search.naver.com/search.naver?query=byd 씰" target="_blank">byd 씰</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>BYD전기차</strong>
+                    <a href="https://search.naver.com/search.naver?query=BYD전기차" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=BYD전기차가격" target="_blank">BYD전기차가격</a></li><li><a href="https://search.naver.com/search.naver?query=byd 전기차" target="_blank">byd 전기차</a></li><li><a href="https://search.naver.com/search.naver?query=byd 전기차 중국" target="_blank">byd 전기차 중국</a></li><li><a href="https://search.naver.com/search.naver?query=byd 전기차 국적" target="_blank">byd 전기차 국적</a></li><li><a href="https://search.naver.com/search.naver?query=byd 전기차 보조금" target="_blank">byd 전기차 보조금</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>혈당컷</strong>
+                    <a href="https://search.naver.com/search.naver?query=혈당컷" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=혈당컷 다이어트" target="_blank">혈당컷 다이어트</a></li><li><a href="https://search.naver.com/search.naver?query=혈당컷슬림" target="_blank">혈당컷슬림</a></li><li><a href="https://search.naver.com/search.naver?query=혈당컷 후기" target="_blank">혈당컷 후기</a></li><li><a href="https://search.naver.com/search.naver?query=혈당컷 부작용" target="_blank">혈당컷 부작용</a></li><li><a href="https://search.naver.com/search.naver?query=혈당컷 추천" target="_blank">혈당컷 추천</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>공복혈당낮추기</strong>
+                    <a href="https://search.naver.com/search.naver?query=공복혈당낮추기" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=공복혈당낮추기 더파인 후기" target="_blank">공복혈당낮추기 더파인 후기</a></li><li><a href="https://search.naver.com/search.naver?query=공복혈당 낮추기" target="_blank">공복혈당 낮추기</a></li><li><a href="https://search.naver.com/search.naver?query=공복 혈당 낮추기 음식" target="_blank">공복 혈당 낮추기 음식</a></li><li><a href="https://search.naver.com/search.naver?query=공복혈당 낮추기 운동" target="_blank">공복혈당 낮추기 운동</a></li><li><a href="https://search.naver.com/search.naver?query=공복 혈당 낮추기 방법" target="_blank">공복 혈당 낮추기 방법</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>스타리아전기차</strong>
+                    <a href="https://search.naver.com/search.naver?query=스타리아전기차" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=스타리아전기차예상가격" target="_blank">스타리아전기차예상가격</a></li><li><a href="https://search.naver.com/search.naver?query=스타리아전기차9인승11인승" target="_blank">스타리아전기차9인승11인승</a></li><li><a href="https://search.naver.com/search.naver?query=스타리아 전기차" target="_blank">스타리아 전기차</a></li><li><a href="https://search.naver.com/search.naver?query=스타리아 전기차 출시" target="_blank">스타리아 전기차 출시</a></li><li><a href="https://search.naver.com/search.naver?query=스타리아 전기차 가격" target="_blank">스타리아 전기차 가격</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>EQA250</strong>
+                    <a href="https://search.naver.com/search.naver?query=EQA250" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=eqa250" target="_blank">eqa250</a></li><li><a href="https://search.naver.com/search.naver?query=eqa250 전기차" target="_blank">eqa250 전기차</a></li><li><a href="https://search.naver.com/search.naver?query=eqa250 제원" target="_blank">eqa250 제원</a></li><li><a href="https://search.naver.com/search.naver?query=eqa250 amg line" target="_blank">eqa250 amg line</a></li><li><a href="https://search.naver.com/search.naver?query=eqa250 중고" target="_blank">eqa250 중고</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>EQB</strong>
+                    <a href="https://search.naver.com/search.naver?query=EQB" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=eqb" target="_blank">eqb</a></li><li><a href="https://search.naver.com/search.naver?query=EQB 300 4MATIC" target="_blank">EQB 300 4MATIC</a></li><li><a href="https://search.naver.com/search.naver?query=eqb300" target="_blank">eqb300</a></li><li><a href="https://search.naver.com/search.naver?query=eqb 주행거리" target="_blank">eqb 주행거리</a></li><li><a href="https://search.naver.com/search.naver?query=eqb 중고" target="_blank">eqb 중고</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>한중정상회담</strong>
+                    <a href="https://search.naver.com/search.naver?query=한중정상회담" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=한중정상회담 관련주" target="_blank">한중정상회담 관련주</a></li><li><a href="https://search.naver.com/search.naver?query=한중정상회담 수혜주" target="_blank">한중정상회담 수혜주</a></li><li><a href="https://search.naver.com/search.naver?query=한중정상회담 무비자" target="_blank">한중정상회담 무비자</a></li><li><a href="https://search.naver.com/search.naver?query=한중 정상회담" target="_blank">한중 정상회담</a></li><li><a href="https://search.naver.com/search.naver?query=한중 정상회담 날짜" target="_blank">한중 정상회담 날짜</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>식후2시간혈당</strong>
+                    <a href="https://search.naver.com/search.naver?query=식후2시간혈당" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=식후2시간혈당재는법" target="_blank">식후2시간혈당재는법</a></li><li><a href="https://search.naver.com/search.naver?query=식후 2시간 혈당" target="_blank">식후 2시간 혈당</a></li><li><a href="https://search.naver.com/search.naver?query=식후 2시간 혈당 정상수치" target="_blank">식후 2시간 혈당 정상수치</a></li><li><a href="https://search.naver.com/search.naver?query=식후 2시간 혈당 150" target="_blank">식후 2시간 혈당 150</a></li><li><a href="https://search.naver.com/search.naver?query=식후 2시간 혈당 200" target="_blank">식후 2시간 혈당 200</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>혈당케어영양제</strong>
+                    <a href="https://search.naver.com/search.naver?query=혈당케어영양제" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=혈당케어 영양제" target="_blank">혈당케어 영양제</a></li><li><a href="https://search.naver.com/search.naver?query=혈당케어 영양제 추천" target="_blank">혈당케어 영양제 추천</a></li><li><a href="https://search.naver.com/search.naver?query=혈당케어 영양제 효과있나요" target="_blank">혈당케어 영양제 효과있나요</a></li><li><a href="https://search.naver.com/search.naver?query=혈당케어 영양제 섭취시간" target="_blank">혈당케어 영양제 섭취시간</a></li><li><a href="https://search.naver.com/search.naver?query=혈당케어 영양제 순위" target="_blank">혈당케어 영양제 순위</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>벤츠EQA</strong>
+                    <a href="https://search.naver.com/search.naver?query=벤츠EQA" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=벤츠 eqa" target="_blank">벤츠 eqa</a></li><li><a href="https://search.naver.com/search.naver?query=벤츠 eqa250" target="_blank">벤츠 eqa250</a></li><li><a href="https://search.naver.com/search.naver?query=벤츠 eqa250 가격" target="_blank">벤츠 eqa250 가격</a></li><li><a href="https://search.naver.com/search.naver?query=벤츠 eqa 프로모션" target="_blank">벤츠 eqa 프로모션</a></li><li><a href="https://search.naver.com/search.naver?query=벤츠 eqa250 전기차" target="_blank">벤츠 eqa250 전기차</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>바나바잎</strong>
+                    <a href="https://search.naver.com/search.naver?query=바나바잎" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=바나바잎 효능" target="_blank">바나바잎 효능</a></li><li><a href="https://search.naver.com/search.naver?query=바나바잎차" target="_blank">바나바잎차</a></li><li><a href="https://search.naver.com/search.naver?query=바나바잎 혈당케어" target="_blank">바나바잎 혈당케어</a></li><li><a href="https://search.naver.com/search.naver?query=바나바잎 추출물" target="_blank">바나바잎 추출물</a></li><li><a href="https://search.naver.com/search.naver?query=바나바잎영양제" target="_blank">바나바잎영양제</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>벤츠EQE</strong>
+                    <a href="https://search.naver.com/search.naver?query=벤츠EQE" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=벤츠eqe350 suv" target="_blank">벤츠eqe350 suv</a></li><li><a href="https://search.naver.com/search.naver?query=벤츠 eqe" target="_blank">벤츠 eqe</a></li><li><a href="https://search.naver.com/search.naver?query=벤츠 eqe350" target="_blank">벤츠 eqe350</a></li><li><a href="https://search.naver.com/search.naver?query=벤츠 eqe suv" target="_blank">벤츠 eqe suv</a></li><li><a href="https://search.naver.com/search.naver?query=벤츠 eqe500" target="_blank">벤츠 eqe500</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>EQA</strong>
+                    <a href="https://search.naver.com/search.naver?query=EQA" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=eqa" target="_blank">eqa</a></li><li><a href="https://search.naver.com/search.naver?query=EQA250" target="_blank">EQA250</a></li><li><a href="https://search.naver.com/search.naver?query=eqa250 전기차" target="_blank">eqa250 전기차</a></li><li><a href="https://search.naver.com/search.naver?query=eqa 중고" target="_blank">eqa 중고</a></li><li><a href="https://search.naver.com/search.naver?query=eqa 주행거리" target="_blank">eqa 주행거리</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>전기차보조금</strong>
+                    <a href="https://search.naver.com/search.naver?query=전기차보조금" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=2026 전기차 보조금" target="_blank">2026 전기차 보조금</a></li><li><a href="https://search.naver.com/search.naver?query=전기차 보조금" target="_blank">전기차 보조금</a></li><li><a href="https://search.naver.com/search.naver?query=2026년 전기차 보조금" target="_blank">2026년 전기차 보조금</a></li><li><a href="https://search.naver.com/search.naver?query=전기차 보조금 2026" target="_blank">전기차 보조금 2026</a></li><li><a href="https://search.naver.com/search.naver?query=대구 전기차 보조금" target="_blank">대구 전기차 보조금</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>EQS</strong>
+                    <a href="https://search.naver.com/search.naver?query=EQS" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=eqs" target="_blank">eqs</a></li><li><a href="https://search.naver.com/search.naver?query=eqs450" target="_blank">eqs450</a></li><li><a href="https://search.naver.com/search.naver?query=eqs suv 580" target="_blank">eqs suv 580</a></li><li><a href="https://search.naver.com/search.naver?query=eqs 마이바흐" target="_blank">eqs 마이바흐</a></li><li><a href="https://search.naver.com/search.naver?query=eqs350" target="_blank">eqs350</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>EQE</strong>
+                    <a href="https://search.naver.com/search.naver?query=EQE" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=eqe350" target="_blank">eqe350</a></li><li><a href="https://search.naver.com/search.naver?query=eqe" target="_blank">eqe</a></li><li><a href="https://search.naver.com/search.naver?query=eqe350+" target="_blank">eqe350+</a></li><li><a href="https://search.naver.com/search.naver?query=eqe suv" target="_blank">eqe suv</a></li><li><a href="https://search.naver.com/search.naver?query=eqe suv 500" target="_blank">eqe suv 500</a></li>
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+    
+            </section>
+        </main>
+    </div>
+
+    <!-- 아카이브 버튼 -->
+    <div style="text-align: center; margin: 2rem 0;">
+        <a href="archive.html" class="archive-btn">📚 과거 분석 결과 보기</a>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="site-footer">
+        <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.querySelector('.keyword-table');
+            if (!table) return;
+
+            const headers = table.querySelectorAll('th');
+            const tbody = table.querySelector('tbody');
+
+            headers.forEach((header, index) => {
+                if (index === headers.length - 1) return;
+
+                header.addEventListener('click', function () {
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const isAsc = header.classList.contains('asc');
+
+                    headers.forEach(h => h.classList.remove('asc', 'desc'));
+                    header.classList.add(isAsc ? 'desc' : 'asc');
+
+                    rows.sort((a, b) => {
+                        let aVal = a.cells[index].textContent.trim();
+                        let bVal = b.cells[index].textContent.trim();
+
+                        const aNum = parseFloat(aVal.replace(/,/g, ''));
+                        const bNum = parseFloat(bVal.replace(/,/g, ''));
+
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return isAsc ? bNum - aNum : aNum - bNum;
+                        }
+
+                        return isAsc
+                            ? bVal.localeCompare(aVal, 'ko')
+                            : aVal.localeCompare(bVal, 'ko');
+                    });
+
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
