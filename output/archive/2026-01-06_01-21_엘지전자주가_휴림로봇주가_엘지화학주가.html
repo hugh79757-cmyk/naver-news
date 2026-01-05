@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그 키워드 인사이트</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- 🔴 Google AdSense 자동광고 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
+        crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --dancheong-blue: #1e3a8a;
+            --dancheong-red: #dc2626;
+            --dancheong-gold: #f59e0b;
+            --dancheong-green: #166534;
+            --dancheong-white: #fefefe;
+            --dancheong-light: #f0f4ff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, var(--dancheong-light) 0%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* ===== 헤더 - 단청 패턴 ===== */
+        .site-header {
+            background: linear-gradient(135deg, var(--dancheong-blue) 0%, #1e40af 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(90deg,
+                    var(--dancheong-red) 0px,
+                    var(--dancheong-red) 20px,
+                    var(--dancheong-gold) 20px,
+                    var(--dancheong-gold) 40px,
+                    var(--dancheong-blue) 40px,
+                    var(--dancheong-blue) 60px,
+                    var(--dancheong-green) 60px,
+                    var(--dancheong-green) 80px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .header-content h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-content p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .header-content small {
+            display: inline-block;
+            margin-top: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* ===== 메인 레이아웃 (1열 - 사이드바 제거) ===== */
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        /* ===== 키워드 테이블 ===== */
+        .keyword-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .keyword-table th,
+        .keyword-table td {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .keyword-table th {
+            background-color: var(--dancheong-blue);
+            color: white;
+            font-weight: bold;
+        }
+
+        .keyword-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .keyword-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .keyword-table td:nth-child(2) {
+            text-align: left;
+        }
+
+        .update-info {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== 분석 버튼 ===== */
+        .analyze-btn {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #03c75a;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .analyze-btn:hover {
+            background: #02a94e;
+        }
+
+        /* ===== 연관검색어 그리드 ===== */
+        .related-keywords {
+            margin-top: 2rem;
+        }
+
+        .related-keywords h3 {
+            color: var(--dancheong-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .related-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e9ecef;
+        }
+
+        .related-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .related-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .related-list li {
+            padding: 4px 0;
+        }
+
+        .related-list li a {
+            color: #495057;
+            text-decoration: none;
+        }
+
+        .related-list li a:hover {
+            color: #03c75a;
+        }
+
+        .related-list .no-data {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* ===== 아카이브 버튼 ===== */
+        .archive-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--dancheong-gold) 0%, #f59e0b 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .archive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        /* ===== 푸터 ===== */
+        .site-footer {
+            background: var(--dancheong-blue);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .site-footer p {
+            opacity: 0.8;
+            font-size: 0.85rem;
+        }
+
+        /* ===== 테이블 정렬 ===== */
+        .keyword-table th {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .keyword-table th:hover {
+            background-color: #1e40af;
+        }
+
+        .keyword-table th::after {
+            content: ' ⇅';
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        .keyword-table th.asc::after {
+            content: ' ▲';
+            opacity: 1;
+        }
+
+        .keyword-table th.desc::after {
+            content: ' ▼';
+            opacity: 1;
+        }
+
+        /* ===== 반응형 ===== */
+        @media (max-width: 768px) {
+            .header-content h1 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .keyword-table {
+                font-size: 12px;
+            }
+
+            .keyword-table th,
+            .keyword-table td {
+                padding: 8px 4px;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 헤더 -->
+    <header class="site-header">
+        <div class="header-content">
+            <h1>🎯 블로그 키워드 인사이트</h1>
+            <p>오늘의 뉴스를 분석한 <strong>SEO 최적화 키워드</strong></p>
+            <small>📅 업데이트: 2026년 01월 05일 07시 45분</small>
+        </div>
+    </header>
+
+    <!-- 메인 레이아웃 -->
+    <div class="main-wrapper">
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <section>
+                
+    <div class="keyword-report">
+        <h3>📊 상위노출 가능 키워드 TOP 50</h3>
+        <p class="update-info">포화도 = 블로그문서수 ÷ 월간검색량 (낮을수록 상위노출 쉬움)</p>
+        
+        <table class="keyword-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>키워드</th>
+                    <th>월간검색량</th>
+                    <th>블로그문서수</th>
+                    <th>포화도</th>
+                    <th>상위노출</th>
+                    <th>분석</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                <tr>
+                    <td>1</td>
+                    <td><strong>마두로체포</strong></td>
+                    <td>13,050</td>
+                    <td>1,395</td>
+                    <td>0.11</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=마두로체포" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>2</td>
+                    <td><strong>임재범은퇴</strong></td>
+                    <td>5,270</td>
+                    <td>1,089</td>
+                    <td>0.21</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=임재범은퇴" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>3</td>
+                    <td><strong>이재명방중</strong></td>
+                    <td>14,210</td>
+                    <td>3,377</td>
+                    <td>0.24</td>
+                    <td>🟢 매우높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=이재명방중" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>4</td>
+                    <td><strong>소뇌위축증</strong></td>
+                    <td>20,490</td>
+                    <td>7,565</td>
+                    <td>0.37</td>
+                    <td>🟡 높음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=소뇌위축증" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>5</td>
+                    <td><strong>췌장암초기증상</strong></td>
+                    <td>46,390</td>
+                    <td>42,148</td>
+                    <td>0.91</td>
+                    <td>🟠 보통</td>
+                    <td><a href="https://search.naver.com/search.naver?query=췌장암초기증상" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>6</td>
+                    <td><strong>줄기세포주사가격</strong></td>
+                    <td>12,260</td>
+                    <td>12,581</td>
+                    <td>1.03</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=줄기세포주사가격" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>7</td>
+                    <td><strong>침샘암</strong></td>
+                    <td>5,450</td>
+                    <td>6,244</td>
+                    <td>1.15</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=침샘암" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+                <tr>
+                    <td>8</td>
+                    <td><strong>베네수엘라대통령</strong></td>
+                    <td>40,560</td>
+                    <td>59,753</td>
+                    <td>1.47</td>
+                    <td>🔴 낮음</td>
+                    <td><a href="https://search.naver.com/search.naver?query=베네수엘라대통령" target="_blank" class="analyze-btn">🔍</a></td>
+                </tr>
+        
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="related-keywords">
+        <h3>🔗 상위 20개 키워드 연관검색어</h3>
+        <p class="update-info">네이버 자동완성 기반 연관검색어입니다.</p>
+        
+        <div class="related-grid">
+    
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>마두로체포</strong>
+                    <a href="https://search.naver.com/search.naver?query=마두로체포" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li class="no-data">연관검색어 없음</li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>임재범은퇴</strong>
+                    <a href="https://search.naver.com/search.naver?query=임재범은퇴" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li class="no-data">연관검색어 없음</li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>이재명방중</strong>
+                    <a href="https://search.naver.com/search.naver?query=이재명방중" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=이재명 방중" target="_blank">이재명 방중</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>소뇌위축증</strong>
+                    <a href="https://search.naver.com/search.naver?query=소뇌위축증" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=소뇌위축증 수명" target="_blank">소뇌위축증 수명</a></li><li><a href="https://search.naver.com/search.naver?query=소뇌위축증 신약" target="_blank">소뇌위축증 신약</a></li><li><a href="https://search.naver.com/search.naver?query=소뇌위축증 증상" target="_blank">소뇌위축증 증상</a></li><li><a href="https://search.naver.com/search.naver?query=소뇌위축증 약" target="_blank">소뇌위축증 약</a></li><li><a href="https://search.naver.com/search.naver?query=소뇌위축증 환우회" target="_blank">소뇌위축증 환우회</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>췌장암초기증상</strong>
+                    <a href="https://search.naver.com/search.naver?query=췌장암초기증상" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=췌장암초기증상가려움증" target="_blank">췌장암초기증상가려움증</a></li><li><a href="https://search.naver.com/search.naver?query=췌장암초기증상소변색" target="_blank">췌장암초기증상소변색</a></li><li><a href="https://search.naver.com/search.naver?query=췌장암 초기증상" target="_blank">췌장암 초기증상</a></li><li><a href="https://search.naver.com/search.naver?query=췌장암 초기증상 등 통증 부위" target="_blank">췌장암 초기증상 등 통증 부위</a></li><li><a href="https://search.naver.com/search.naver?query=췌장암 초기증상 검사" target="_blank">췌장암 초기증상 검사</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>줄기세포주사가격</strong>
+                    <a href="https://search.naver.com/search.naver?query=줄기세포주사가격" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=줄기세포주사가격 오앤의원" target="_blank">줄기세포주사가격 오앤의원</a></li><li><a href="https://search.naver.com/search.naver?query=줄기세포 주사 가격" target="_blank">줄기세포 주사 가격</a></li><li><a href="https://search.naver.com/search.naver?query=피부 줄기세포 주사 가격" target="_blank">피부 줄기세포 주사 가격</a></li><li><a href="https://search.naver.com/search.naver?query=얼굴 줄기세포 주사 가격" target="_blank">얼굴 줄기세포 주사 가격</a></li><li><a href="https://search.naver.com/search.naver?query=줄기세포 주사 가격 얼굴" target="_blank">줄기세포 주사 가격 얼굴</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>침샘암</strong>
+                    <a href="https://search.naver.com/search.naver?query=침샘암" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=침샘암 증상" target="_blank">침샘암 증상</a></li><li><a href="https://search.naver.com/search.naver?query=침샘암 완치" target="_blank">침샘암 완치</a></li><li><a href="https://search.naver.com/search.naver?query=침샘암 생존율" target="_blank">침샘암 생존율</a></li><li><a href="https://search.naver.com/search.naver?query=침샘암 원인" target="_blank">침샘암 원인</a></li><li><a href="https://search.naver.com/search.naver?query=침샘암 4기" target="_blank">침샘암 4기</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>베네수엘라대통령</strong>
+                    <a href="https://search.naver.com/search.naver?query=베네수엘라대통령" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=베네수엘라 대통령" target="_blank">베네수엘라 대통령</a></li><li><a href="https://search.naver.com/search.naver?query=베네수엘라 대통령 생포" target="_blank">베네수엘라 대통령 생포</a></li><li><a href="https://search.naver.com/search.naver?query=미국 베네수엘라 대통령" target="_blank">미국 베네수엘라 대통령</a></li><li><a href="https://search.naver.com/search.naver?query=베네수엘라 대통령 부정선거" target="_blank">베네수엘라 대통령 부정선거</a></li><li><a href="https://search.naver.com/search.naver?query=베네수엘라 대통령 생포 이유" target="_blank">베네수엘라 대통령 생포 이유</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>C형간염</strong>
+                    <a href="https://search.naver.com/search.naver?query=C형간염" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=c형간염" target="_blank">c형간염</a></li><li><a href="https://search.naver.com/search.naver?query=c형간염 증상" target="_blank">c형간염 증상</a></li><li><a href="https://search.naver.com/search.naver?query=c형간염 항체" target="_blank">c형간염 항체</a></li><li><a href="https://search.naver.com/search.naver?query=c형간염 치료" target="_blank">c형간염 치료</a></li><li><a href="https://search.naver.com/search.naver?query=c형간염 원인" target="_blank">c형간염 원인</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>한중정상회담</strong>
+                    <a href="https://search.naver.com/search.naver?query=한중정상회담" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=한중정상회담 일정" target="_blank">한중정상회담 일정</a></li><li><a href="https://search.naver.com/search.naver?query=한중정상회담 무비자" target="_blank">한중정상회담 무비자</a></li><li><a href="https://search.naver.com/search.naver?query=한중 정상회담" target="_blank">한중 정상회담</a></li><li><a href="https://search.naver.com/search.naver?query=한중 정상회담 날짜" target="_blank">한중 정상회담 날짜</a></li><li><a href="https://search.naver.com/search.naver?query=한중 정상회담 관련주" target="_blank">한중 정상회담 관련주</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>설암</strong>
+                    <a href="https://search.naver.com/search.naver?query=설암" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=설암 초기증상" target="_blank">설암 초기증상</a></li><li><a href="https://search.naver.com/search.naver?query=설암 사진" target="_blank">설암 사진</a></li><li><a href="https://search.naver.com/search.naver?query=설암 증상" target="_blank">설암 증상</a></li><li><a href="https://search.naver.com/search.naver?query=설암 원인" target="_blank">설암 원인</a></li><li><a href="https://search.naver.com/search.naver?query=설암 수술" target="_blank">설암 수술</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>삼성전자주식</strong>
+                    <a href="https://search.naver.com/search.naver?query=삼성전자주식" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=삼성전자주식전망" target="_blank">삼성전자주식전망</a></li><li><a href="https://search.naver.com/search.naver?query=삼성전자주식가격" target="_blank">삼성전자주식가격</a></li><li><a href="https://search.naver.com/search.naver?query=삼성전자주식시세" target="_blank">삼성전자주식시세</a></li><li><a href="https://search.naver.com/search.naver?query=삼성전자주식배당락일" target="_blank">삼성전자주식배당락일</a></li><li><a href="https://search.naver.com/search.naver?query=삼성전자주식주가" target="_blank">삼성전자주식주가</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>루게릭병</strong>
+                    <a href="https://search.naver.com/search.naver?query=루게릭병" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=루게릭병 초기증상" target="_blank">루게릭병 초기증상</a></li><li><a href="https://search.naver.com/search.naver?query=루게릭병 증상" target="_blank">루게릭병 증상</a></li><li><a href="https://search.naver.com/search.naver?query=루게릭병 원인" target="_blank">루게릭병 원인</a></li><li><a href="https://search.naver.com/search.naver?query=루게릭병 완치" target="_blank">루게릭병 완치</a></li><li><a href="https://search.naver.com/search.naver?query=루게릭병원" target="_blank">루게릭병원</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>다발성골수종</strong>
+                    <a href="https://search.naver.com/search.naver?query=다발성골수종" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=다발성골수종 완치" target="_blank">다발성골수종 완치</a></li><li><a href="https://search.naver.com/search.naver?query=다발성골수종 예후" target="_blank">다발성골수종 예후</a></li><li><a href="https://search.naver.com/search.naver?query=다발성골수종 증상" target="_blank">다발성골수종 증상</a></li><li><a href="https://search.naver.com/search.naver?query=다발성골수종 카페" target="_blank">다발성골수종 카페</a></li><li><a href="https://search.naver.com/search.naver?query=다발성골수종 신약" target="_blank">다발성골수종 신약</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>NK세포활성도검사</strong>
+                    <a href="https://search.naver.com/search.naver?query=NK세포활성도검사" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=nk세포활성도검사" target="_blank">nk세포활성도검사</a></li><li><a href="https://search.naver.com/search.naver?query=nk세포활성도검사란" target="_blank">nk세포활성도검사란</a></li><li><a href="https://search.naver.com/search.naver?query=nk세포활성도검사 가격" target="_blank">nk세포활성도검사 가격</a></li><li><a href="https://search.naver.com/search.naver?query=nk세포활성도검사 수치 2000" target="_blank">nk세포활성도검사 수치 2000</a></li><li><a href="https://search.naver.com/search.naver?query=nk세포활성도검사 부산" target="_blank">nk세포활성도검사 부산</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>현대자동차주식</strong>
+                    <a href="https://search.naver.com/search.naver?query=현대자동차주식" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=현대자동차주식가격" target="_blank">현대자동차주식가격</a></li><li><a href="https://search.naver.com/search.naver?query=현대자동차주식배당금날짜" target="_blank">현대자동차주식배당금날짜</a></li><li><a href="https://search.naver.com/search.naver?query=현대자동차주식얼마" target="_blank">현대자동차주식얼마</a></li><li><a href="https://search.naver.com/search.naver?query=현대자동차주식차트" target="_blank">현대자동차주식차트</a></li><li><a href="https://search.naver.com/search.naver?query=현대자동차주식사는방법" target="_blank">현대자동차주식사는방법</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>줄기세포주사</strong>
+                    <a href="https://search.naver.com/search.naver?query=줄기세포주사" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=줄기세포주사비용" target="_blank">줄기세포주사비용</a></li><li><a href="https://search.naver.com/search.naver?query=줄기세포주사 효과" target="_blank">줄기세포주사 효과</a></li><li><a href="https://search.naver.com/search.naver?query=줄기세포주사는 강남오앤" target="_blank">줄기세포주사는 강남오앤</a></li><li><a href="https://search.naver.com/search.naver?query=줄기세포주사 글로리의원" target="_blank">줄기세포주사 글로리의원</a></li><li><a href="https://search.naver.com/search.naver?query=줄기세포 주사 가격" target="_blank">줄기세포 주사 가격</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>한화오션주식</strong>
+                    <a href="https://search.naver.com/search.naver?query=한화오션주식" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=한화오션주식시세" target="_blank">한화오션주식시세</a></li><li><a href="https://search.naver.com/search.naver?query=한화오션주식가격" target="_blank">한화오션주식가격</a></li><li><a href="https://search.naver.com/search.naver?query=한화오션주식수량" target="_blank">한화오션주식수량</a></li><li><a href="https://search.naver.com/search.naver?query=한화오션주식정보" target="_blank">한화오션주식정보</a></li><li><a href="https://search.naver.com/search.naver?query=한화오션주식얼마" target="_blank">한화오션주식얼마</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>직장암</strong>
+                    <a href="https://search.naver.com/search.naver?query=직장암" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=직장암 초기증상" target="_blank">직장암 초기증상</a></li><li><a href="https://search.naver.com/search.naver?query=직장암 증상" target="_blank">직장암 증상</a></li><li><a href="https://search.naver.com/search.naver?query=직장암 생존율" target="_blank">직장암 생존율</a></li><li><a href="https://search.naver.com/search.naver?query=직장암 3기" target="_blank">직장암 3기</a></li><li><a href="https://search.naver.com/search.naver?query=직장암 4기" target="_blank">직장암 4기</a></li>
+                </ul>
+            </div>
+            
+            <div class="related-card">
+                <div class="related-header">
+                    <strong>전기차전환지원금</strong>
+                    <a href="https://search.naver.com/search.naver?query=전기차전환지원금" target="_blank" class="analyze-btn">🔍</a>
+                </div>
+                <ul class="related-list">
+            <li><a href="https://search.naver.com/search.naver?query=전기차 전환지원금" target="_blank">전기차 전환지원금</a></li><li><a href="https://search.naver.com/search.naver?query=전기차 전환지원금 조건" target="_blank">전기차 전환지원금 조건</a></li><li><a href="https://search.naver.com/search.naver?query=전기차 전환지원금 대상" target="_blank">전기차 전환지원금 대상</a></li><li><a href="https://search.naver.com/search.naver?query=전기차 전환지원금 방법" target="_blank">전기차 전환지원금 방법</a></li><li><a href="https://search.naver.com/search.naver?query=전기차 전환지원금 기간" target="_blank">전기차 전환지원금 기간</a></li>
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+    
+            </section>
+        </main>
+    </div>
+
+    <!-- 아카이브 버튼 -->
+    <div style="text-align: center; margin: 2rem 0;">
+        <a href="archive.html" class="archive-btn">📚 과거 분석 결과 보기</a>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="site-footer">
+        <p>🤖 Powered by Claude AI · News Keyword Analyzer</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.querySelector('.keyword-table');
+            if (!table) return;
+
+            const headers = table.querySelectorAll('th');
+            const tbody = table.querySelector('tbody');
+
+            headers.forEach((header, index) => {
+                if (index === headers.length - 1) return;
+
+                header.addEventListener('click', function () {
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const isAsc = header.classList.contains('asc');
+
+                    headers.forEach(h => h.classList.remove('asc', 'desc'));
+                    header.classList.add(isAsc ? 'desc' : 'asc');
+
+                    rows.sort((a, b) => {
+                        let aVal = a.cells[index].textContent.trim();
+                        let bVal = b.cells[index].textContent.trim();
+
+                        const aNum = parseFloat(aVal.replace(/,/g, ''));
+                        const bNum = parseFloat(bVal.replace(/,/g, ''));
+
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return isAsc ? bNum - aNum : aNum - bNum;
+                        }
+
+                        return isAsc
+                            ? bVal.localeCompare(aVal, 'ko')
+                            : aVal.localeCompare(bVal, 'ko');
+                    });
+
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
